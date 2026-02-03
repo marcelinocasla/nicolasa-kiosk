@@ -1,0 +1,239 @@
+.container {
+    min-height: 100vh;
+    background-color: var(--color-background-light);
+    padding: 2rem;
+}
+
+.content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 1rem;
+    z-index: 10;
+    margin-bottom: 2rem;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.backBtn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-main);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.backBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.title {
+    font-family: 'Santana', sans-serif;
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.tabSwitcher {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: var(--radius-full);
+}
+
+.tabBtn {
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+}
+
+.activeTab {
+    background: white;
+    color: var(--color-text-main);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.deliveryStatus {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.statusLabel {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.toggleBtn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 800;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggleOn {
+    background-color: #22c55e;
+    color: white;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+.toggleOff {
+    background-color: #ef4444;
+    color: white;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.saveBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(7, 56, 37, 0.3);
+}
+
+.saveBtn:hover {
+    transform: translateY(-2px);
+    background-color: #0a4f32;
+}
+
+.mainCard {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+}
+
+.sectionTitle {
+    font-family: 'Santana', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--color-text-main);
+}
+
+.productGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.productRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-lg);
+    background-color: #f8fafc;
+    align-items: flex-start;
+    transition: all 0.2s;
+}
+
+.productRow:hover {
+    background-color: #f1f8f4;
+    border-color: var(--color-accent);
+}
+
+@media (min-width: 768px) {
+    .productRow {
+        grid-template-columns: 2fr 3fr 1fr auto;
+    }
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.input {
+    padding: 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.inputMain {
+    font-size: 1rem;
+}
+
+.textArea {
+    padding: 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    resize: none;
+    height: 70px;
+    font-family: 'SF Pro Display', sans-serif;
+}
+
+.priceInput {
+    color: var(--color-primary);
+    font-weight: 800;
+}
+
+.checkboxWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+}
+
+.checkboxLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    user-select: none;
+}

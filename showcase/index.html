@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nicolasa App Showcase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="prevBtn" class="control-btn">←</button>
+            <button id="pauseBtn" class="control-btn">❚❚</button>
+            <button id="nextBtn" class="control-btn">→</button>
+        </div>
+
+        <!-- SCENE 1: INTRO -->
+        <section class="scene active" id="scene-1" data-duration="5000">
+            <div class="content-center">
+                <h1 class="title-lg fade-in-up">NICOLASA</h1>
+                <p class="subtitle fade-in-up delay-1">Revolución Gastronómica</p>
+            </div>
+        </section>
+
+        <!-- SCENE 2: PROBLEM -->
+        <section class="scene" id="scene-2" data-duration="6000">
+            <div class="content-left">
+                <h2 class="title-md text-red fade-in-right">EL PROBLEMA</h2>
+                <ul class="list-problem">
+                    <li class="fade-in-right delay-1">⚠ Filas Interminables</li>
+                    <li class="fade-in-right delay-2">⚠ Errores en Comandas</li>
+                    <li class="fade-in-right delay-3">⚠ Pérdida de Ventas</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SCENE 3: SOLUTION -->
+        <section class="scene" id="scene-3" data-duration="5000">
+            <div class="content-center">
+                <h2 class="title-md text-green zoom-in">LA SOLUCIÓN</h2>
+                <h3 class="title-sm fade-in-up delay-1">Autonomía. Rapidez. Precisión.</h3>
+            </div>
+        </section>
+
+        <!-- SCENE 4: HOME SCREEN -->
+        <section class="scene" id="scene-4" data-duration="8000">
+            <div class="split-layout">
+                <div class="text-panel">
+                    <h2 class="title-sm text-green slide-in-left">Bienvenida Impactante</h2>
+                    <p class="desc slide-in-left delay-1">Un diseño visual que invita a consumir desde el primer
+                        segundo.</p>
+                </div>
+                <div class="image-panel">
+                    <img src="../capturas/01_Home.png" class="screenshot tilt-card" alt="Home Screen">
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 5: ORDER TYPE -->
+        <section class="scene" id="scene-5" data-duration="7000">
+            <div class="split-layout reverse">
+                <div class="text-panel">
+                    <h2 class="title-sm text-green slide-in-right">Flexibilidad Total</h2>
+                    <p class="desc slide-in-right delay-1">¿Para comer acá o para llevar?</p>
+                    <p class="desc slide-in-right delay-2">El cliente decide, el sistema se adapta.</p>
+                </div>
+                <div class="image-panel">
+                    <img src="../capturas/02_OrderType.png" class="screenshot float" alt="Order Type">
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 6: MENU -->
+        <section class="scene" id="scene-6" data-duration="8000">
+            <div class="split-layout">
+                <div class="text-panel">
+                    <h2 class="title-sm text-green slide-in-left">Menú Intuitivo</h2>
+                    <p class="desc slide-in-left delay-1">Categorías claras. Fotos apetitoas.</p>
+                    <p class="desc slide-in-left delay-2">Navegación fluida que aumenta el ticket promedio.</p>
+                </div>
+                <div class="image-panel">
+                    <img src="../capturas/03_Menu.png" class="screenshot slight-zoom" alt="Menu">
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 7: SUMMARY -->
+        <section class="scene" id="scene-7" data-duration="7000">
+            <div class="split-layout reverse">
+                <div class="text-panel">
+                    <h2 class="title-sm text-green slide-in-right">Claridad Absoluta</h2>
+                    <p class="desc slide-in-right delay-1">Resumen de pedido instantáneo.</p>
+                    <p class="desc slide-in-right delay-2">Sin sorpresas al pagar.</p>
+                </div>
+                <div class="image-panel">
+                    <img src="../capturas/04_OrderSummary.png" class="screenshot slide-up" alt="Summary">
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 8: ADMIN OWNER -->
+        <section class="scene" id="scene-8" data-duration="8000">
+            <div class="content-overlay">
+                <img src="../capturas/06_AdminOwner_Dashboard.png" class="bg-screenshot" alt="Admin Dashboard">
+                <div class="overlay-text">
+                    <h2 class="title-md text-green drop-in">CONTROL TOTAL</h2>
+                    <p class="desc drop-in delay-1">Dueños: Métricas en tiempo real. Ventas del día. Tendencias.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 9: MOBILE -->
+        <section class="scene" id="scene-9" data-duration="8000">
+            <div class="mobile-grid">
+                <h2 class="title-sm text-green grid-header fade-in">100% Responsive</h2>
+                <div class="mobile-frame delay-1 pop-in">
+                    <img src="../capturas/01_Home_Mobile.png" alt="Mobile Home">
+                </div>
+                <div class="mobile-frame delay-2 pop-in">
+                    <img src="../capturas/03_Menu_Mobile.png" alt="Mobile Menu">
+                </div>
+                <div class="mobile-frame delay-3 pop-in">
+                    <img src="../capturas/06_AdminOwner_Dashboard_Mobile.png" alt="Mobile Admin">
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 10: OUTRO -->
+        <section class="scene" id="scene-10" data-duration="10000">
+            <div class="content-center">
+                <h1 class="title-lg fade-in-up">NICOLASA</h1>
+                <p class="subtitle fade-in-up delay-1">Transforma tu negocio hoy.</p>
+                <div class="end-credits fade-in delay-3">
+                    <p>Desarrollado para la excelencia.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,93 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    background-color: var(--color-background-light);
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+.title {
+    font-size: 3rem;
+    text-align: center;
+    color: var(--color-primary);
+    margin-bottom: 3rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+}
+
+.card {
+    background-color: white;
+    border: 3px solid transparent;
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+}
+
+.card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-5px);
+}
+
+.card:active {
+    transform: scale(0.98);
+}
+
+.iconWrapper {
+    width: 120px;
+    height: 120px;
+    background-color: #f0fdf4;
+    /* Light green tint */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--color-primary);
+}
+
+.cardLabel {
+    font-family: 'Santana', sans-serif;
+    font-size: 2rem;
+    color: var(--color-text-main);
+}
+
+.cardSub {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+}
+
+.logoSmall {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.footer {
+    margin-top: auto;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    padding-top: 2rem;
+}

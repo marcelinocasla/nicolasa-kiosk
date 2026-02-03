@@ -1,0 +1,181 @@
+.container {
+    min-height: 100vh;
+    padding: 2rem;
+    background-color: var(--color-background-light);
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .layout {
+        grid-template-columns: 1.2fr 1fr;
+    }
+}
+
+.card {
+    background-color: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-family: 'Santana', sans-serif;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.dishCard {
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f8fafc;
+}
+
+.dishHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.dishTitle {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+}
+
+.ingredientList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ingredientItem {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    padding: 0.25rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+}
+
+.select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    background-color: white;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    font-family: 'Santana', sans-serif;
+    color: var(--color-primary);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.btnAddMore {
+    background: white;
+    border: 2px dashed var(--color-primary);
+    color: var(--color-primary);
+    padding: 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1rem;
+    transition: all 0.2s;
+}
+
+.btnAddMore:hover {
+    background-color: #f0fff4;
+}
+
+.btnConfirm {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(7, 56, 37, 0.3);
+    transition: all 0.2s;
+}
+
+.btnConfirm:hover {
+    background-color: #0a4f32;
+    transform: translateY(-2px);
+}
+
+.trashBtn {
+    color: #ef4444;
+    cursor: pointer;
+    padding: 4px;
+}

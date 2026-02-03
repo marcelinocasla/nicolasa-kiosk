@@ -1,0 +1,10 @@
+{
+  "appName": "Restaurante Nicolasa",
+  "deliveryEnabled": true,
+  "eatInEnabled": false,
+  "whatsappNumber": "+5491126830760",
+  "totalOrders": 0,
+  "totalRevenue": 0,
+  "adminPassword": "Oyola26",
+  "devPassword": "Marce"
+}

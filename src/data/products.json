@@ -1,0 +1,90 @@
+[
+  {
+    "id": "1",
+    "name": "Lomito",
+    "category": "Carnes",
+    "price": 54500,
+    "description": "Lomito completo con ingredientes frescos.",
+    "available": true
+  },
+  {
+    "id": "2",
+    "name": "Bife",
+    "category": "Carnes",
+    "price": 5500,
+    "description": "Bife de chorizo jugoso.",
+    "available": true
+  },
+  {
+    "id": "3",
+    "name": "Pollo Broaster",
+    "category": "Carnes",
+    "price": 4000,
+    "description": "Pollo crocante estilo broaster.",
+    "available": true
+  },
+  {
+    "id": "4",
+    "name": "Silpancho",
+    "category": "Carnes",
+    "price": 5000,
+    "description": "Plato tradicional con carne apanada y arroz.",
+    "available": true
+  },
+  {
+    "id": "5",
+    "name": "Pollo Frito",
+    "category": "Carnes",
+    "price": 3800,
+    "description": "Pollo frito clásico.",
+    "available": true
+  },
+  {
+    "id": "6",
+    "name": "1/4 de Pollo",
+    "category": "Carnes",
+    "price": 4200,
+    "description": "Cuarto de pollo asado con guarnición.",
+    "available": true
+  },
+  {
+    "id": "7",
+    "name": "Papas Fritas",
+    "category": "Guarniciones",
+    "price": 2000,
+    "description": "Porción de papas fritas bastón.",
+    "available": true
+  },
+  {
+    "id": "8",
+    "name": "Arroz",
+    "category": "Guarniciones",
+    "price": 1500,
+    "description": "Porción de arroz blanco.",
+    "available": true
+  },
+  {
+    "id": "9",
+    "name": "Ensalada Mixta",
+    "category": "Ensaladas",
+    "price": 2500,
+    "description": "Lechuga, tomate y cebolla.",
+    "available": true
+  },
+  {
+    "id": "10",
+    "name": "Coca Cola 1.5L",
+    "category": "Bebidas",
+    "price": 2800,
+    "description": "Gaseosa cola.",
+    "available": true
+  },
+  {
+    "id": "11",
+    "name": "Agua Mineral",
+    "category": "Bebidas",
+    "price": 1500,
+    "description": "Agua sin gas 500ml.",
+    "available": true
+  }
+]

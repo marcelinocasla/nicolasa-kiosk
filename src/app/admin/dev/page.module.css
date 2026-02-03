@@ -1,0 +1,159 @@
+.container {
+    min-height: 100vh;
+    background-color: var(--color-background-light);
+    padding: 2rem;
+}
+
+.content {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.backBtn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-main);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.backBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.title {
+    font-family: 'Santana', sans-serif;
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.section {
+    margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+    font-family: 'Santana', sans-serif;
+    font-size: 1.5rem;
+    color: var(--color-text-main);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-muted);
+}
+
+.input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(7, 56, 37, 0.1);
+}
+
+.helperText {
+    font-size: 0.85rem;
+    color: #b45309;
+    background-color: #fffbeb;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+    border: 1px solid #fcd34d;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.metricCard {
+    padding: 1.5rem;
+    border-radius: var(--radius-xl);
+    text-align: center;
+}
+
+.metricCardBlue {
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+.metricCardGreen {
+    background-color: #f0fdf4;
+    color: var(--color-primary);
+}
+
+.metricLabel {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.metricValue {
+    font-size: 2.5rem;
+    font-family: 'Santana', sans-serif;
+    font-weight: 900;
+}
+
+.saveBtn {
+    width: 100%;
+    padding: 1.2rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(7, 56, 37, 0.3);
+}
+
+.saveBtn:hover {
+    background-color: #0a4f32;
+    transform: translateY(-2px);
+}
