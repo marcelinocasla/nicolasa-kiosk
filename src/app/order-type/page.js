@@ -19,6 +19,63 @@ async function getSettings() {
     }
 }
 
+// Client component to handle order type selection and localStorage
+function OrderTypeSelection({ settings }) {
+    const router = useRouter()
+    const [orderType, setOrderType] = useState(null)
+
+    const selectType = (type) => {
+        setOrderType(type)
+        localStorage.setItem('order_type', type)
+        router.push('/menu')
+    }
+
+    return (
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h1 className={styles.title}>¿Cómo quieres pedir?</h1>
+
+            <div className={styles.grid}>
+                {settings.eatInEnabled ? (
+                    <button onClick={() => selectType('eat-in')} className={styles.card}>
+                        <div className={styles.iconWrapper}>
+                            <Utensils size={64} />
+                        </div>
+                        <span className={styles.cardLabel}>Para comer aquí</span>
+                        <span className={styles.cardSub}>Service at table</span>
+                    </button>
+                ) : (
+                    <div className={`${styles.card} ${styles.disabled}`} style={{ opacity: 0.5, cursor: 'not-allowed', borderColor: '#eee' }}>
+                        <div className={styles.iconWrapper} style={{ backgroundColor: '#eee', color: '#ccc' }}>
+                            <Utensils size={64} />
+                        </div>
+                        <span className={styles.cardLabel} style={{ color: '#ccc' }}>Para comer aquí</span>
+                        <span className={styles.cardSub}>No disponible</span>
+                    </div>
+                )}
+
+                {settings.deliveryEnabled ? (
+                    <button onClick={() => selectType('delivery')} className={styles.card}>
+                        <div className={styles.iconWrapper}>
+                            <ShoppingBag size={64} />
+                        </div>
+                        <span className={styles.cardLabel}>Delivery</span>
+                        <span className={styles.cardSub}>Take away</span>
+                    </button>
+                ) : (
+                    <div className={`${styles.card} ${styles.disabled}`} style={{ opacity: 0.5, cursor: 'not-allowed', borderColor: '#eee' }}>
+                        <div className={styles.iconWrapper} style={{ backgroundColor: '#eee', color: '#ccc' }}>
+                            <ShoppingBag size={64} />
+                        </div>
+                        <span className={styles.cardLabel} style={{ color: '#ccc' }}>Delivery</span>
+                        <span className={styles.cardSub}>No disponible</span>
+                    </div>
+                )}
+            </div>
+        </main>
+    )
+}
+
+
 export default async function OrderType() {
     const settings = await getSettings()
 

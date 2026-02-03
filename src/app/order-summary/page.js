@@ -53,7 +53,7 @@ export default function OrderSummary() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         if (!formData.name || !formData.address || !formData.phone) {
             alert('Por favor completa los campos obligatorios (Nombre, Dirección, Teléfono)')
             return
@@ -61,6 +61,30 @@ export default function OrderSummary() {
 
         const total = getTotal()
 
+        // 1. Save to Database first
+        try {
+            const orderData = {
+                customer_name: formData.name,
+                order_type: localStorage.getItem('order_type') || 'delivery', // Get from storage
+                items: confirmedOrder,
+                total: total
+            };
+
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                console.error('Failed to save order to DB');
+                // We proceed anyway to WhatsApp, but log the error
+            }
+        } catch (err) {
+            console.error('Error saving order:', err);
+        }
+
+        // 2. Prepare WhatsApp message
         let message = `*Nuevo Pedido - Restaurante Nicolasa*\n`
         message += `--------------------------------\n`
         message += `*Cliente:* ${formData.name}\n`
@@ -74,7 +98,7 @@ export default function OrderSummary() {
         confirmedOrder.forEach((dish, idx) => {
             message += `*Plato ${idx + 1}:* ($${dish.total.toLocaleString('es-AR')})\n`
             Object.entries(dish.ingredients).forEach(([id, qty]) => {
-                const product = products.find(p => p.id === id)
+                const product = products.find(p => String(p.id) === String(id))
                 if (product) {
                     message += `- ${product.name} (x${qty})\n`
                 }
@@ -118,7 +142,7 @@ export default function OrderSummary() {
                                 </div>
                                 <ul className={styles.ingredientList}>
                                     {Object.entries(dish.ingredients).map(([id, qty]) => {
-                                        const product = products.find(p => p.id === id)
+                                        const product = products.find(p => String(p.id) === String(id))
                                         if (!product) return null
                                         return (
                                             <li key={id} className={styles.ingredientItem}>

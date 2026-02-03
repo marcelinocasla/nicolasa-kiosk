@@ -71,12 +71,10 @@ function MenuContent() {
         })
     }
 
-    const getTotal = () => {
-        return Object.entries(currentDishIngredients).reduce((total, [id, qty]) => {
-            const product = products.find(p => p.id === id)
-            return total + (product ? product.price * qty : 0)
-        }, 0)
-    }
+    return Object.entries(currentDishIngredients).reduce((total, [id, qty]) => {
+        const product = products.find(p => String(p.id) === String(id))
+        return total + (product ? product.price * qty : 0)
+    }, 0)
 
     const handleContinue = () => {
         // 1. Get existing confirmed order (array of dishes)
@@ -138,7 +136,7 @@ function MenuContent() {
 
                 <div className={styles.grid}>
                     {activeProducts.map(product => {
-                        const qty = currentDishIngredients[product.id] || 0
+                        const qty = currentDishIngredients[String(product.id)] || 0
                         return (
                             <div
                                 key={product.id}

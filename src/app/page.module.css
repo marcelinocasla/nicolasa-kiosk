@@ -70,3 +70,20 @@
     opacity: 0.4;
   }
 }
+
+/* Mobile Fixes */
+@media (max-width: 600px) {
+  .logoContainer {
+    width: 180px;
+    height: 180px;
+  }
+
+  .title {
+    font-size: 2.2rem;
+    padding: 0 1rem;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+  }
+}

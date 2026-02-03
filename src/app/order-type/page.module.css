@@ -91,3 +91,34 @@
     font-size: 0.8rem;
     padding-top: 2rem;
 }
+
+/* Mobile Fixes */
+@media (max-width: 600px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .card {
+        padding: 2rem;
+    }
+
+    .iconWrapper {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 1rem;
+    }
+
+    .cardLabel {
+        font-size: 1.5rem;
+    }
+}

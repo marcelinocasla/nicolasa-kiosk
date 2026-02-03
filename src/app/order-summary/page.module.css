@@ -179,3 +179,31 @@
     cursor: pointer;
     padding: 4px;
 }
+
+/* Mobile Fixes */
+@media (max-width: 600px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .title {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.3rem;
+    }
+
+    .totalRow {
+        font-size: 1.2rem;
+    }
+
+    .btnConfirm {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}
