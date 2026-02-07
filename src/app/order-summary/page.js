@@ -65,8 +65,21 @@ export default function OrderSummary() {
         try {
             const orderData = {
                 customer_name: formData.name,
-                order_type: localStorage.getItem('order_type') || 'delivery', // Get from storage
-                items: confirmedOrder,
+                customer_phone: formData.phone, // Adding phone to DB
+                customer_address: formData.address,
+                order_type: localStorage.getItem('order_type') || 'delivery',
+                items: confirmedOrder.map((dish, dishIdx) => ({
+                    dish_name: `Plato #${dishIdx + 1}`,
+                    dish_total: dish.total,
+                    ingredients: Object.entries(dish.ingredients).map(([id, qty]) => {
+                        const product = products.find(p => String(p.id) === String(id));
+                        return {
+                            name: product?.name || 'Ingrediente Desconocido',
+                            price: product?.price || 0,
+                            quantity: qty
+                        };
+                    })
+                })),
                 total: total
             };
 

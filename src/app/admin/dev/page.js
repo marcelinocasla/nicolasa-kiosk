@@ -10,16 +10,34 @@ export default function DevPanel() {
     const [settings, setSettings] = useState(null)
     const [loading, setLoading] = useState(true)
 
+    const [orders, setOrders] = useState([])
+    const [metrics, setMetrics] = useState({ orders: 0, revenue: 0 })
+
+    const fetchData = () => {
+        setLoading(true)
+        Promise.all([
+            fetch('/api/settings').then(res => res.json()),
+            fetch('/api/orders').then(res => res.json())
+        ]).then(([settingsData, ordersData]) => {
+            setSettings(settingsData)
+            if (Array.isArray(ordersData)) {
+                setOrders(ordersData) // Store all orders
+
+                const completedOrders = ordersData.filter(o => o.status === 'completed')
+                const totalOrdersCount = ordersData.length
+                const totalRevenueCalc = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+
+                setMetrics({
+                    orders: totalOrdersCount,
+                    revenue: totalRevenueCalc
+                })
+            }
+            setLoading(false)
+        })
+    }
+
     useEffect(() => {
-        // In a real app we'd check auth token here
-        fetch('/api/settings') // This one is "safe", but we need the "unsafe" one for editing passwords?
-            // Actually the update endpoint allows updating everything.
-            // For this demo, we assume we are authorized.
-            .then(res => res.json())
-            .then(data => {
-                setSettings(data)
-                setLoading(false)
-            })
+        fetchData()
     }, [])
 
     const handleSave = async () => {
@@ -35,12 +53,15 @@ export default function DevPanel() {
         }
     }
 
-    if (loading) return <div className="p-8 text-center">Cargando...</div>
+    if (loading) return <div className="p-8 text-center" style={{ color: 'white' }}>Cargando datos...</div>
 
     return (
         <div className={styles.container}>
             <div className={styles.content}>
                 <div className={styles.header}>
+                    <button onClick={() => router.push('/')} className={styles.backBtn} title="Ir al Inicio" style={{ marginRight: '1rem' }}>
+                        <Home />
+                    </button>
                     <button onClick={() => router.push('/admin')} className={styles.backBtn}>
                         <ArrowLeft />
                     </button>
@@ -75,10 +96,6 @@ export default function DevPanel() {
 
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>Seguridad (Contraseñas)</h2>
-                        {/* Note: The GET /api/settings filters out passwords, so they might be empty initially.
-                    We would need a separate secure endpoint to get them if we want to show them.
-                    For now, let's allow setting NEW passwords only if needed, or leave blank to keep.
-                */}
                         <div className={styles.grid}>
                             <p className={styles.helperText}>
                                 Dejar en blanco para mantener la contraseña actual.
@@ -109,16 +126,79 @@ export default function DevPanel() {
                     </section>
 
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Métricas</h2>
+                        <h2 className={styles.sectionTitle}>Métricas en Tiempo Real</h2>
                         <div className={styles.metricsGrid}>
                             <div className={`${styles.metricCard} ${styles.metricCardBlue}`}>
-                                <div className={styles.metricLabel}>Total Pedidos</div>
-                                <div className={styles.metricValue}>{settings.totalOrders || 0}</div>
+                                <div className={styles.metricLabel}>Total Pedidos (Histórico)</div>
+                                <div className={styles.metricValue}>{metrics.orders}</div>
                             </div>
                             <div className={`${styles.metricCard} ${styles.metricCardGreen}`}>
-                                <div className={styles.metricLabel}>Ingresos Totales</div>
-                                <div className={styles.metricValue}>${(settings.totalRevenue || 0).toLocaleString()}</div>
+                                <div className={styles.metricLabel}>Ingresos Totales (Completados)</div>
+                                <div className={styles.metricValue}>${(metrics.revenue).toLocaleString()}</div>
                             </div>
+                        </div>
+                    </section>
+
+
+
+                    {/* ORDER HISTORY DASHBOARD for DEV */}
+                    <section className={styles.section}>
+                        <div className={styles.header} style={{ padding: 0, marginBottom: '1.5rem' }}>
+                            <h2 className={styles.sectionTitle}>Historial de Pedidos (Debug)</h2>
+                            <button onClick={fetchData} className={styles.toggleBtn}>
+                                <RefreshCw size={20} />
+                            </button>
+                        </div>
+
+                        <div className={styles.orderGrid}>
+                            {orders.map(order => (
+                                <div key={order.id} className={styles.orderCard}>
+                                    <div className={styles.cardHeader}>
+                                        <div>
+                                            <h3 className={styles.orderId}>#{order.id}</h3>
+                                            <p className={styles.customerInfo}>{order.customer_name || 'Cliente'}</p>
+                                            <div className={styles.customerInfo} style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                                                {order.created_at ? new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                                            </div>
+                                            {order.customer_phone && (
+                                                <p className={styles.customerInfo} style={{ color: 'var(--color-accent)' }}>
+                                                    {order.customer_phone}
+                                                </p>
+                                            )}
+
+                                            <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                                                {order.status === 'cancelled' && (
+                                                    <span style={{ background: '#ef4444', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>CANCELADO</span>
+                                                )}
+                                                {order.was_edited && (
+                                                    <span style={{ background: '#eab308', color: 'black', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>EDITADO</span>
+                                                )}
+                                                {order.status === 'completed' && (
+                                                    <span style={{ background: 'var(--color-primary)', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>COMPLETADO</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className={styles.orderMeta}>
+                                            <p className={styles.orderTotal}>${order.total?.toLocaleString()}</p>
+                                            <span className={styles.orderTypeBadge}>{order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.itemsList}>
+                                        {order.items && order.items.map((item, idx) => (
+                                            <div key={idx} className={styles.orderItem}>
+                                                <div className={styles.itemInfo}>
+                                                    <span className={styles.itemQty}>{item.quantity}</span>
+                                                    <span className={styles.itemName}>{item.name}</span>
+                                                </div>
+                                                <div className={styles.itemActions}>
+                                                    <span className={styles.itemPrice}>${(item.price * item.quantity).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </section>
 
@@ -128,8 +208,8 @@ export default function DevPanel() {
                     >
                         <Save size={20} /> Guardar Cambios
                     </button>
-                </div>
-            </div>
-        </div>
+                </div >
+            </div >
+        </div >
     )
 }

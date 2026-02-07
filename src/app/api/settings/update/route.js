@@ -11,6 +11,7 @@ export async function POST(req) {
             whatsapp_number: body.whatsappNumber,
             delivery_enabled: body.deliveryEnabled,
             eat_in_enabled: body.eatInEnabled,
+            category_order: body.categoryOrder,
             // Don't overwrite totals if not provided, or handle logic elsewhere.
             // Assuming this endpoint sends full object, but be careful.
             // Better to only update what's passed if we used PATCH, but POST is fine for now.

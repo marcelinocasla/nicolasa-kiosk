@@ -25,7 +25,8 @@ export async function GET() {
             deliveryEnabled: settings.delivery_enabled,
             eatInEnabled: settings.eat_in_enabled,
             totalOrders: settings.total_orders,
-            totalRevenue: settings.total_revenue
+            totalRevenue: settings.total_revenue,
+            categoryOrder: settings.category_order || []
         };
 
         return NextResponse.json(safeSettings);

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, ArrowLeft, Plus, Trash2, RefreshCw } from 'lucide-react'
+import { Save, ArrowLeft, Plus, Trash2, RefreshCw, Home, ChevronUp, ChevronDown, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -12,6 +12,8 @@ export default function OwnerPanel() {
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('products') // 'products' or 'orders'
+    const [searchTerm, setSearchTerm] = useState('')
+    const [categoryOrder, setCategoryOrder] = useState([])
 
     useEffect(() => {
         Promise.all([
@@ -21,22 +23,45 @@ export default function OwnerPanel() {
         ]).then(([productsData, settingsData, ordersData]) => {
             setProducts(productsData)
             setSettings(settingsData)
-            setOrders(ordersData || []) // Handle potential null if error
+            setCategoryOrder(settingsData.categoryOrder || [])
+            setOrders(ordersData || [])
             setLoading(false)
         })
     }, [])
 
+    // ... (keep auto-refresh effect) ... 
+
     const refreshOrders = async () => {
-        const res = await fetch('/api/orders?status=pending')
-        const data = await res.json()
-        setOrders(data)
+        try {
+            // If activeTab is 'history', fetch all. Else fetch pending.
+            const statusParam = activeTab === 'history' ? 'all' : 'pending'
+            const res = await fetch(`/api/orders?status=${statusParam}`)
+            const data = await res.json()
+            setOrders(data)
+        } catch (error) {
+            console.error("Error refreshing orders:", error)
+        }
     }
+
+    // Refresh when tab changes
+    useEffect(() => {
+        if (activeTab === 'orders' || activeTab === 'history') {
+            refreshOrders()
+        }
+    }, [activeTab])
+
 
     const saveProducts = async (newProducts) => {
         await fetch('/api/products/update', {
             method: 'POST',
             body: JSON.stringify(newProducts)
         })
+
+        // Also save settings to persist category order
+        if (settings) {
+            await saveSettings({ ...settings, categoryOrder })
+        }
+
         setProducts(newProducts)
     }
 
@@ -54,10 +79,12 @@ export default function OwnerPanel() {
 
     const updateProduct = (id, field, value) => {
         const updated = products.map(p => p.id === id ? { ...p, [field]: value } : p)
-        setProducts(updated) // Optimistic update
+        setProducts(updated)
     }
 
     const updateOrderStatus = async (orderId, newStatus) => {
+        if (newStatus === 'cancelled' && !confirm('¿Estás seguro de cancelar este pedido?')) return;
+
         await fetch('/api/orders', {
             method: 'PUT',
             body: JSON.stringify({ id: orderId, status: newStatus })
@@ -65,17 +92,20 @@ export default function OwnerPanel() {
         refreshOrders()
     }
 
-    // Function to modify an item inside an order (e.g. remove it)
     const removeOrderItem = async (order, itemIndex) => {
         const newItems = [...order.items];
         newItems.splice(itemIndex, 1);
 
-        // Recalculate total
-        const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity || 0), 0);
 
         await fetch('/api/orders', {
             method: 'PUT',
-            body: JSON.stringify({ id: order.id, items: newItems, total: newTotal })
+            body: JSON.stringify({
+                id: order.id,
+                items: newItems,
+                total: newTotal,
+                was_edited: true // Flag as edited
+            })
         })
         refreshOrders()
         alert('Item eliminado del pedido');
@@ -86,6 +116,62 @@ export default function OwnerPanel() {
         alert('Cambios guardados')
     }
 
+    const moveCategory = (category, direction) => {
+        // Get unique categories from products to ensure we have all of them
+        const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
+
+        // Merge with existing order, appending any new ones at the end
+        let currentOrder = [...categoryOrder]
+        uniqueCategories.forEach(c => {
+            if (!currentOrder.includes(c)) currentOrder.push(c)
+        })
+
+        // Remove any that no longer exist
+        currentOrder = currentOrder.filter(c => uniqueCategories.includes(c))
+
+        const index = currentOrder.indexOf(category)
+        if (index === -1) return
+
+        const newOrder = [...currentOrder]
+        if (direction === 'up' && index > 0) {
+            [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]]
+        } else if (direction === 'down' && index < newOrder.length - 1) {
+            [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]]
+        }
+
+        setCategoryOrder(newOrder)
+    }
+
+    const addNewProduct = () => {
+        const newProduct = {
+            id: Date.now(), // Temporary ID until DB assigns one (or handle differently)
+            name: '',
+            category: 'Nuevos',
+            description: '',
+            price: 0,
+            available: true
+        }
+        setProducts([newProduct, ...products])
+    }
+
+    // Derived state for rendering
+    const getSortedCategories = () => {
+        const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
+
+        // Combine known order with any un-ordered categories appended
+        const sorted = [...categoryOrder]
+        uniqueCategories.forEach(c => {
+            if (!sorted.includes(c)) sorted.push(c)
+        })
+
+        return sorted.filter(c => uniqueCategories.includes(c))
+    }
+
+    const filteredProducts = products.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
     if (loading) return <div className="p-8 text-center">Cargando...</div>
 
     return (
@@ -95,7 +181,10 @@ export default function OwnerPanel() {
                 {/* Header & Delivery Toggle */}
                 <div className={styles.header}>
                     <div className={styles.headerLeft}>
-                        <button onClick={() => router.push('/admin')} className={styles.backBtn}>
+                        <button onClick={() => router.push('/')} className={styles.backBtn} title="Ir al Inicio">
+                            <Home />
+                        </button>
+                        <button onClick={() => router.push('/admin')} className={styles.backBtn} title="Volver al Admin">
                             <ArrowLeft />
                         </button>
                         <h1 className={styles.title}>Panel del Dueño</h1>
@@ -113,7 +202,13 @@ export default function OwnerPanel() {
                                 className={`${styles.tabBtn} ${activeTab === 'orders' ? styles.activeTab : ''}`}
                                 onClick={() => setActiveTab('orders')}
                             >
-                                Pedidos ({orders.length})
+                                Pendientes
+                            </button>
+                            <button
+                                className={`${styles.tabBtn} ${activeTab === 'history' ? styles.activeTab : ''}`}
+                                onClick={() => setActiveTab('history')}
+                            >
+                                Historial (Finalizados)
                             </button>
                         </div>
 
@@ -152,58 +247,63 @@ export default function OwnerPanel() {
                 {activeTab === 'products' ? (
                     /* Product Management */
                     <div className={styles.mainCard}>
-                        <h2 className={styles.sectionTitle}>Gestionar Productos</h2>
+                        <div className={styles.productsHeader}>
+                            <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Gestionar Productos</h2>
+
+                            <div className={styles.productsActions}>
+                                <div className={styles.searchWrapper}>
+                                    <Search size={18} className={styles.searchIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar productos..."
+                                        className={styles.searchInput}
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <button onClick={addNewProduct} className={styles.addBtn}>
+                                    <Plus size={18} /> Nuevo Producto
+                                </button>
+                            </div>
+                        </div>
 
                         <div className={styles.productGrid}>
-                            {products.map(product => (
-                                <div key={product.id} className={styles.productRow}>
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Nombre</label>
-                                        <input
-                                            className={`${styles.input} ${styles.inputMain}`}
-                                            value={product.name}
-                                            onChange={e => updateProduct(product.id, 'name', e.target.value)}
-                                        />
-                                        <input
-                                            className={styles.input}
-                                            style={{ marginTop: '0.5rem' }}
-                                            value={product.category}
-                                            onChange={e => updateProduct(product.id, 'category', e.target.value)}
-                                            list="categories"
-                                            placeholder="Categoría"
-                                        />
-                                    </div>
+                            {/* Group by Category if no search term, otherwise show flat list */}
+                            {searchTerm ? (
+                                filteredProducts.map(product => (
+                                    <ProductRow key={product.id} product={product} updateProduct={updateProduct} />
+                                ))
+                            ) : (
+                                getSortedCategories().map((category, catIdx) => (
+                                    <div key={category} className={styles.categorySection}>
+                                        <div className={styles.categoryHeader}>
+                                            <div className={styles.categoryTitleWrapper}>
+                                                <h3 className={styles.categoryTitle}>{category}</h3>
+                                                <div className={styles.categoryControls}>
+                                                    <button
+                                                        onClick={() => moveCategory(category, 'up')}
+                                                        className={styles.orderBtn}
+                                                        disabled={catIdx === 0}
+                                                    >
+                                                        <ChevronUp size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => moveCategory(category, 'down')}
+                                                        className={styles.orderBtn}
+                                                        disabled={catIdx === getSortedCategories().length - 1}
+                                                    >
+                                                        <ChevronDown size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Descripción</label>
-                                        <textarea
-                                            className={styles.textArea}
-                                            value={product.description}
-                                            onChange={e => updateProduct(product.id, 'description', e.target.value)}
-                                        />
+                                        {products.filter(p => p.category === category).map(product => (
+                                            <ProductRow key={product.id} product={product} updateProduct={updateProduct} />
+                                        ))}
                                     </div>
-
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Precio ($)</label>
-                                        <input
-                                            type="number"
-                                            className={`${styles.input} ${styles.priceInput}`}
-                                            value={product.price}
-                                            onChange={e => updateProduct(product.id, 'price', parseInt(e.target.value))}
-                                        />
-                                    </div>
-
-                                    <div className={styles.checkboxWrapper} onClick={() => updateProduct(product.id, 'available', !product.available)}>
-                                        <input
-                                            type="checkbox"
-                                            checked={product.available}
-                                            onChange={() => { }} // handled by wrapper
-                                            style={{ accentColor: 'var(--color-primary)' }}
-                                        />
-                                        <span className={styles.checkboxLabel}>Disponible</span>
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
 
                         <datalist id="categories">
@@ -213,55 +313,115 @@ export default function OwnerPanel() {
                 ) : (
                     /* ORDER MANAGEMENT */
                     <div className={styles.mainCard}>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className={styles.header}>
                             <h2 className={styles.sectionTitle}>Pedidos Pendientes</h2>
-                            <button onClick={refreshOrders} className="p-2 bg-gray-700 rounded hover:bg-gray-600 text-white"><RefreshCw size={20} /></button>
+                            <button onClick={refreshOrders} className={styles.toggleBtn}>
+                                <RefreshCw size={20} />
+                            </button>
                         </div>
 
                         {orders.length === 0 ? (
-                            <p className="text-gray-400 text-center py-10">No hay pedidos pendientes.</p>
+                            <p style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
+                                No hay pedidos pendientes.
+                            </p>
                         ) : (
-                            <div className="grid gap-4">
+                            <div className={styles.orderGrid}>
                                 {orders.map(order => (
-                                    <div key={order.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                                        <div className="flex justify-between items-start mb-4">
+                                    <div key={order.id} className={styles.orderCard}>
+                                        <div className={styles.cardHeader}>
                                             <div>
-                                                <h3 className="text-xl font-bold text-green-400">#{order.id} - {order.customer_name || 'Cliente'}</h3>
-                                                <p className="text-sm text-gray-400">
-                                                    {new Date(order.created_at).toLocaleString()} |
-                                                    <span className="ml-2 uppercase font-bold text-yellow-500">{order.order_type}</span>
-                                                </p>
+                                                <h3 className={styles.orderId}>#{order.id}</h3>
+                                                <p className={styles.customerInfo}>{order.customer_name || 'Cliente'}</p>
+                                                <div className={styles.customerInfo} style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                                                    {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                                {order.customer_phone && (
+                                                    <p className={styles.customerInfo} style={{ color: 'var(--color-accent)' }}>
+                                                        {order.customer_phone}
+                                                    </p>
+                                                )}
+
+                                                {/* Status Indicators */}
+                                                <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                                                    {order.status === 'cancelled' && (
+                                                        <span style={{ background: '#ef4444', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>CANCELADO</span>
+                                                    )}
+                                                    {order.was_edited && (
+                                                        <span style={{ background: '#eab308', color: 'black', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>EDITADO</span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-2xl font-bold text-white">${order.total}</p>
-                                                <button
-                                                    onClick={() => updateOrderStatus(order.id, 'completed')}
-                                                    className="mt-2 text-sm bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded"
-                                                >
-                                                    Completar
-                                                </button>
+                                            <div className={styles.orderMeta}>
+                                                <p className={styles.orderTotal}>${order.total.toLocaleString()}</p>
+                                                <span className={styles.orderTypeBadge}>{order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}</span>
                                             </div>
                                         </div>
 
-                                        <div className="bg-gray-900 rounded p-3">
+                                        <div className={styles.itemsList}>
                                             {order.items && order.items.map((item, idx) => (
-                                                <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="font-bold text-white w-6 text-center bg-gray-700 rounded">{item.quantity}</span>
-                                                        <span className="text-gray-300">{item.name}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="text-gray-400">${item.price * item.quantity}</span>
-                                                        <button
-                                                            onClick={() => removeOrderItem(order, idx)}
-                                                            className="text-red-500 hover:text-red-400"
-                                                            title="Eliminar item"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
+                                                <div key={idx} className={styles.dishGroup}>
+                                                    {/* NEW STRUCTURE: Dish with ingredients */}
+                                                    {item.ingredients ? (
+                                                        <>
+                                                            <div className={styles.dishHeaderRow}>
+                                                                <span className={styles.dishName}>{item.dish_name || `Plato #${idx + 1}`}</span>
+                                                                <span className={styles.dishTotalDev}>${(item.dish_total || 0).toLocaleString()}</span>
+                                                                <button
+                                                                    onClick={() => removeOrderItem(order, idx)}
+                                                                    className={styles.deleteItemBtn}
+                                                                    title="Eliminar plato"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                            <div className={styles.ingredientsSubList}>
+                                                                {item.ingredients.map((ing, ingIdx) => (
+                                                                    <div key={ingIdx} className={styles.orderItem}>
+                                                                        <div className={styles.itemInfo}>
+                                                                            <span className={styles.itemQty}>{ing.quantity}</span>
+                                                                            <span className={styles.itemName}>{ing.name}</span>
+                                                                        </div>
+                                                                        <span className={styles.itemPrice}>${(ing.price * ing.quantity).toLocaleString()}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        /* LEGACY STRUCTURE: Flat list or Dish with ingredients object (handled gracefully) */
+                                                        <div className={styles.orderItem}>
+                                                            <div className={styles.itemInfo}>
+                                                                <span className={styles.itemQty}>{item.quantity || 1}</span>
+                                                                <span className={styles.itemName}>{item.name || `Plato #${idx + 1}`}</span>
+                                                            </div>
+                                                            <div className={styles.itemActions}>
+                                                                <span className={styles.itemPrice}>${((item.price || item.total || 0) * (item.quantity || 1)).toLocaleString()}</span>
+                                                                <button
+                                                                    onClick={() => removeOrderItem(order, idx)}
+                                                                    className={styles.deleteItemBtn}
+                                                                    title="Eliminar item"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
+                                        </div>
+
+                                        <div className={styles.cardActions}>
+                                            <button
+                                                onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                                                className={styles.btnCancel}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                onClick={() => updateOrderStatus(order.id, 'completed')}
+                                                className={styles.btnComplete}
+                                            >
+                                                Completar Pedido
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -270,6 +430,58 @@ export default function OwnerPanel() {
                     </div>
                 )}
 
+            </div>
+        </div>
+    )
+}
+
+function ProductRow({ product, updateProduct }) {
+    return (
+        <div className={styles.productRow}>
+            <div className={styles.fieldGroup}>
+                <label className={styles.label}>Nombre</label>
+                <input
+                    className={`${styles.input} ${styles.inputMain}`}
+                    value={product.name}
+                    onChange={e => updateProduct(product.id, 'name', e.target.value)}
+                />
+                <input
+                    className={styles.input}
+                    style={{ marginTop: '0.5rem' }}
+                    value={product.category}
+                    onChange={e => updateProduct(product.id, 'category', e.target.value)}
+                    list="categories"
+                    placeholder="Categoría"
+                />
+            </div>
+
+            <div className={styles.fieldGroup}>
+                <label className={styles.label}>Descripción</label>
+                <textarea
+                    className={styles.textArea}
+                    value={product.description}
+                    onChange={e => updateProduct(product.id, 'description', e.target.value)}
+                />
+            </div>
+
+            <div className={styles.fieldGroup}>
+                <label className={styles.label}>Precio ($)</label>
+                <input
+                    type="number"
+                    className={`${styles.input} ${styles.priceInput}`}
+                    value={product.price}
+                    onChange={e => updateProduct(product.id, 'price', parseInt(e.target.value) || 0)}
+                />
+            </div>
+
+            <div className={styles.checkboxWrapper} onClick={() => updateProduct(product.id, 'available', !product.available)}>
+                <input
+                    type="checkbox"
+                    checked={product.available}
+                    onChange={() => { }} // handled by wrapper
+                    style={{ accentColor: 'var(--color-primary)' }}
+                />
+                <span className={styles.checkboxLabel}>Disponible</span>
             </div>
         </div>
     )

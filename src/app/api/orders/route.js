@@ -10,7 +10,7 @@ export async function GET(req) {
 
         let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
 
-        if (status) {
+        if (status && status !== 'all') {
             query = query.eq('status', status);
         }
 
@@ -32,7 +32,8 @@ export async function POST(req) {
         const newOrder = {
             ...order,
             status: 'pending',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            was_edited: false
         };
 
         const { data, error } = await supabase

@@ -157,3 +157,127 @@
     background-color: #0a4f32;
     transform: translateY(-2px);
 }
+
+/* ORDER STYLES (Copied from Owner Panel for Consistency) */
+.orderGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.orderCard {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.orderId {
+    font-family: 'Santana', sans-serif;
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.customerInfo {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+}
+
+.orderMeta {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.orderTotal {
+    font-family: 'Santana', sans-serif;
+    font-size: 1.8rem;
+    color: var(--color-text-main);
+    line-height: 1;
+}
+
+.orderTypeBadge {
+    background: #e2e8f0;
+    color: var(--color-text-muted);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+.itemsList {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid #f1f5f9;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.orderItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.orderItem:last-child {
+    border-bottom: none;
+}
+
+.itemInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.itemQty {
+    background: var(--color-primary);
+    color: white;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.itemName {
+    color: var(--color-text-main);
+    font-weight: 500;
+}
+
+.itemPrice {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.toggleBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: color 0.2s;
+}
+
+.toggleBtn:hover {
+    color: var(--color-primary);
+}

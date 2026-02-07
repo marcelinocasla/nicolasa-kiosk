@@ -9,8 +9,9 @@ export default function Home() {
         <Image
           src="/logo.png"
           alt="Restaurante Nicolasa"
-          width={250}
-          height={250}
+          fill
+          sizes="(max-width: 600px) 180px, 250px"
+          style={{ objectFit: 'contain', padding: '15px' }}
           priority
         />
       </div>

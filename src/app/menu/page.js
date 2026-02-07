@@ -48,10 +48,8 @@ function MenuContent() {
     const toggleIngredient = (product) => {
         setCurrentDishIngredients(prev => {
             const newIngredients = { ...prev }
-            // Logic: For this app, ingredients are usually x1, but let's allow multiple if needed.
-            // Requirement says "Items shown separately like ingredients".
-            // Let's increment quantity like before.
-            newIngredients[product.id] = (newIngredients[product.id] || 0) + 1
+            const pId = String(product.id)
+            newIngredients[pId] = (newIngredients[pId] || 0) + 1
             localStorage.setItem('current_dish_ingredients', JSON.stringify(newIngredients))
             return newIngredients
         })
@@ -62,19 +60,22 @@ function MenuContent() {
         e.stopPropagation() // Prevent triggering card click
         setCurrentDishIngredients(prev => {
             const newIngredients = { ...prev }
-            if (newIngredients[product.id] > 0) {
-                newIngredients[product.id] -= 1
-                if (newIngredients[product.id] === 0) delete newIngredients[product.id]
+            const pId = String(product.id)
+            if (newIngredients[pId] > 0) {
+                newIngredients[pId] -= 1
+                if (newIngredients[pId] === 0) delete newIngredients[pId]
             }
             localStorage.setItem('current_dish_ingredients', JSON.stringify(newIngredients))
             return newIngredients
         })
     }
 
-    return Object.entries(currentDishIngredients).reduce((total, [id, qty]) => {
-        const product = products.find(p => String(p.id) === String(id))
-        return total + (product ? product.price * qty : 0)
-    }, 0)
+    const getTotal = () => {
+        return Object.entries(currentDishIngredients).reduce((total, [id, qty]) => {
+            const product = products.find(p => String(p.id) === String(id))
+            return total + (product ? product.price * qty : 0)
+        }, 0)
+    }
 
     const handleContinue = () => {
         // 1. Get existing confirmed order (array of dishes)
@@ -84,7 +85,6 @@ function MenuContent() {
         } catch (e) { }
 
         // 2. Add current dish to it
-        // A dish is an object: { id: timestamp, ingredients: { id: qty }, total: number }
         if (Object.keys(currentDishIngredients).length > 0) {
             const newDish = {
                 id: Date.now(),
@@ -170,7 +170,6 @@ function MenuContent() {
 
                 {/* Footer */}
                 <footer className={styles.footer}>
-                    {/* El botón volver aquí quizás debería limpiar solo si no hay nada seleccionado, pero por simplicidad volvemos al inicio o tipo de pedido */}
                     <button className={styles.backButton} onClick={() => router.push('/order-type')}>
                         <ArrowLeft size={20} /> Cancelar
                     </button>
