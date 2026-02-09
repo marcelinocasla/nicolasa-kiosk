@@ -43,12 +43,19 @@ export default function OwnerPanel() {
 
     const refreshOrders = async () => {
         try {
+            setLoading(true) // Show loading state when refreshing
             // If activeTab is 'history', fetch all. Else fetch pending.
             const statusParam = activeTab === 'history' ? 'all' : 'pending'
-            const res = await fetch(`/api/orders?status=${statusParam}`)
+
+            // Add timestamp to prevent caching
+            const res = await fetch(`/api/orders?status=${statusParam}&t=${Date.now()}`)
+
             if (!res.ok) throw new Error('Failed to fetch orders')
             const data = await res.json()
+
             if (Array.isArray(data)) {
+                // If in history mode, sort by ID descending (newest first) or Date
+                // The API already orders by created_at desc
                 setOrders(data)
             } else {
                 console.error("Orders data is not an array:", data)
@@ -56,7 +63,8 @@ export default function OwnerPanel() {
             }
         } catch (error) {
             console.error("Error refreshing orders:", error)
-            alert("Error actualizando pedidos")
+        } finally {
+            setLoading(false)
         }
     }
 
