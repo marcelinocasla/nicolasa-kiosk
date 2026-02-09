@@ -34,19 +34,43 @@ function MenuContent() {
             setProducts(productsData)
 
             const uniqueCategories = [...new Set(productsData.map(p => p.category))]
-            const categoryOrder = settingsData.categoryOrder || []
 
-            // Sort categories: specific order first, then any remaining new categories
-            const sortedCategories = [...categoryOrder]
+            // Defined order requested by user. 
+            // We use this as the base. If settings has a custom order, we could use it, 
+            // but the user specifically asked for THIS order to be fixed now.
+            // We'll merge settingsOrder if available, but ensure these come first if they exist.
+            const DEFAULT_ORDER = ['Carnes', 'Guarniciones', 'Ensaladas', 'Salsas', 'Bebidas']
+
+            let baseOrder = settingsData.categoryOrder && settingsData.categoryOrder.length > 0
+                ? settingsData.categoryOrder
+                : DEFAULT_ORDER
+
+            // forceful fix: if baseOrder doesn't look right or user wants to force it, we can prepend DEFAULT_ORDER
+            // uniqueCategories check is important.
+
+            // Let's build the sorted list:
+            // 1. Start with the explicit DEFAULT_ORDER (or settings order if we trust it, but user says it fails)
+            // To ensure it works, we will prioritize the DEFAULT_ORDER for now.
+
+            const sortedCategories = []
+
+            // Add categories from the preferred order if they exist in products
+            const preferredOrder = settingsData.categoryOrder && settingsData.categoryOrder.length > 0 ? settingsData.categoryOrder : DEFAULT_ORDER;
+
+            preferredOrder.forEach(c => {
+                if (uniqueCategories.includes(c) && !sortedCategories.includes(c)) {
+                    sortedCategories.push(c)
+                }
+            })
+
+            // Add any remaining categories from products that weren't in the preferred list
             uniqueCategories.forEach(c => {
                 if (!sortedCategories.includes(c)) sortedCategories.push(c)
             })
-            // Filter to ensure we only show categories that actually exist in products
-            const finalCategories = sortedCategories.filter(c => uniqueCategories.includes(c))
 
-            setCategories(finalCategories)
+            setCategories(sortedCategories)
 
-            if (finalCategories.length > 0) setActiveCategory(finalCategories[0])
+            if (sortedCategories.length > 0) setActiveCategory(sortedCategories[0])
 
             // Load CURRENT DISH draft if exists
             const draft = localStorage.getItem('current_dish_ingredients')
