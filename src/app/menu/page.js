@@ -26,23 +26,37 @@ function MenuContent() {
     const [currentDishIngredients, setCurrentDishIngredients] = useState({})
 
     useEffect(() => {
-        // Load products
-        fetch('/api/products')
-            .then(res => res.json())
-            .then(data => {
-                setProducts(data)
-                const cats = [...new Set(data.map(p => p.category))]
-                setCategories(cats)
-                if (cats.length > 0) setActiveCategory(cats[0])
+        // Load products and settings in parallel
+        Promise.all([
+            fetch('/api/products').then(res => res.json()),
+            fetch('/api/settings').then(res => res.json())
+        ]).then(([productsData, settingsData]) => {
+            setProducts(productsData)
 
-                // Load CURRENT DISH draft if exists
-                const draft = localStorage.getItem('current_dish_ingredients')
-                if (draft) {
-                    try {
-                        setCurrentDishIngredients(JSON.parse(draft))
-                    } catch (e) { }
-                }
+            const uniqueCategories = [...new Set(productsData.map(p => p.category))]
+            const categoryOrder = settingsData.categoryOrder || []
+
+            // Sort categories: specific order first, then any remaining new categories
+            const sortedCategories = [...categoryOrder]
+            uniqueCategories.forEach(c => {
+                if (!sortedCategories.includes(c)) sortedCategories.push(c)
             })
+            // Filter to ensure we only show categories that actually exist in products
+            const finalCategories = sortedCategories.filter(c => uniqueCategories.includes(c))
+
+            setCategories(finalCategories)
+
+            if (finalCategories.length > 0) setActiveCategory(finalCategories[0])
+
+            // Load CURRENT DISH draft if exists
+            const draft = localStorage.getItem('current_dish_ingredients')
+            if (draft) {
+                try {
+                    setCurrentDishIngredients(JSON.parse(draft))
+                } catch (e) { }
+            }
+        })
+            .catch(err => console.error("Error loading menu data:", err))
     }, [])
 
     const toggleIngredient = (product) => {
