@@ -34,6 +34,11 @@ export default function DevPanel() {
             }
             setLoading(false)
         })
+            .catch(err => {
+                console.error("Error loading data:", err)
+                setLoading(false)
+                alert("Error cargando datos. Revisa la consola.")
+            })
     }
 
     useEffect(() => {
@@ -54,6 +59,7 @@ export default function DevPanel() {
     }
 
     if (loading) return <div className="p-8 text-center" style={{ color: 'white' }}>Cargando datos...</div>
+    if (!settings) return <div className="p-8 text-center" style={{ color: 'white' }}>Error al cargar configuración.</div>
 
     return (
         <div className={styles.container}>

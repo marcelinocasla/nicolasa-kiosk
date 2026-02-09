@@ -24,9 +24,19 @@ export default function OwnerPanel() {
             setProducts(productsData)
             setSettings(settingsData)
             setCategoryOrder(settingsData.categoryOrder || [])
-            setOrders(ordersData || [])
+            if (Array.isArray(ordersData)) {
+                setOrders(ordersData)
+            } else {
+                setOrders([])
+            }
+            setLoading(false)
             setLoading(false)
         })
+            .catch(err => {
+                console.error("Error loading owner data:", err)
+                setLoading(false)
+                alert("Error cargando datos del panel. Revisa la consola.")
+            })
     }, [])
 
     // ... (keep auto-refresh effect) ... 
@@ -36,10 +46,17 @@ export default function OwnerPanel() {
             // If activeTab is 'history', fetch all. Else fetch pending.
             const statusParam = activeTab === 'history' ? 'all' : 'pending'
             const res = await fetch(`/api/orders?status=${statusParam}`)
+            if (!res.ok) throw new Error('Failed to fetch orders')
             const data = await res.json()
-            setOrders(data)
+            if (Array.isArray(data)) {
+                setOrders(data)
+            } else {
+                console.error("Orders data is not an array:", data)
+                setOrders([])
+            }
         } catch (error) {
             console.error("Error refreshing orders:", error)
+            alert("Error actualizando pedidos")
         }
     }
 
