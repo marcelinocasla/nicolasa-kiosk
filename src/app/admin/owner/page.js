@@ -358,7 +358,7 @@ export default function OwnerPanel() {
                                                 <h3 className={styles.orderId}>#{order.id}</h3>
                                                 <p className={styles.customerInfo}>{order.customer_name || 'Cliente'}</p>
                                                 <div className={styles.customerInfo} style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-                                                    {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {order.created_at ? new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                                                 </div>
                                                 {order.customer_phone && (
                                                     <p className={styles.customerInfo} style={{ color: 'var(--color-accent)' }}>
@@ -377,7 +377,7 @@ export default function OwnerPanel() {
                                                 </div>
                                             </div>
                                             <div className={styles.orderMeta}>
-                                                <p className={styles.orderTotal}>${order.total.toLocaleString()}</p>
+                                                <p className={styles.orderTotal}>${(order.total || 0).toLocaleString()}</p>
                                                 <span className={styles.orderTypeBadge}>{order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}</span>
                                             </div>
                                         </div>
@@ -406,7 +406,7 @@ export default function OwnerPanel() {
                                                                             <span className={styles.itemQty}>{ing.quantity}</span>
                                                                             <span className={styles.itemName}>{ing.name}</span>
                                                                         </div>
-                                                                        <span className={styles.itemPrice}>${(ing.price * ing.quantity).toLocaleString()}</span>
+                                                                        <span className={styles.itemPrice}>${((ing.price || 0) * (ing.quantity || 1)).toLocaleString()}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>

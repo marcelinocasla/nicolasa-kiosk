@@ -185,7 +185,7 @@ export default function DevPanel() {
                                             </div>
                                         </div>
                                         <div className={styles.orderMeta}>
-                                            <p className={styles.orderTotal}>${order.total?.toLocaleString()}</p>
+                                            <p className={styles.orderTotal}>${(order.total || 0).toLocaleString()}</p>
                                             <span className={styles.orderTypeBadge}>{order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}</span>
                                         </div>
                                     </div>
@@ -198,7 +198,7 @@ export default function DevPanel() {
                                                     <span className={styles.itemName}>{item.name}</span>
                                                 </div>
                                                 <div className={styles.itemActions}>
-                                                    <span className={styles.itemPrice}>${(item.price * item.quantity).toLocaleString()}</span>
+                                                    <span className={styles.itemPrice}>${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</span>
                                                 </div>
                                             </div>
                                         ))}
