@@ -7,10 +7,11 @@
 .content {
     max-width: 800px;
     margin: 0 auto;
-    background: white;
+    background: var(--color-surface);
     padding: 3rem;
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border);
 }
 
 .header {
@@ -24,8 +25,8 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 2px solid #e2e8f0;
-    background: white;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -55,7 +56,7 @@
     font-size: 1.5rem;
     color: var(--color-text-main);
     margin-bottom: 1.5rem;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border);
     padding-bottom: 0.5rem;
 }
 
@@ -74,28 +75,30 @@
 .input {
     width: 100%;
     padding: 1rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     font-size: 1rem;
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
     transition: all 0.2s;
 }
 
 .input:focus {
     outline: none;
     border-color: var(--color-primary);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(7, 56, 37, 0.1);
+    background: var(--color-surface);
+    box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1);
 }
 
 .helperText {
     font-size: 0.85rem;
-    color: #b45309;
-    background-color: #fffbeb;
+    color: #fdba74;
+    /* Orange-300 approx */
+    background-color: rgba(255, 85, 0, 0.1);
     padding: 1rem;
     border-radius: var(--radius-lg);
     margin-bottom: 1.5rem;
-    border: 1px solid #fcd34d;
+    border: 1px solid rgba(255, 85, 0, 0.3);
 }
 
 .metricsGrid {
@@ -111,13 +114,17 @@
 }
 
 .metricCardBlue {
-    background-color: #eff6ff;
-    color: #1e40af;
+    background-color: rgba(30, 64, 175, 0.2);
+    /* Dark blue tint */
+    color: #93c5fd;
+    /* Light blue text */
+    border: 1px solid rgba(30, 64, 175, 0.3);
 }
 
 .metricCardGreen {
-    background-color: #f0fdf4;
+    background-color: rgba(255, 85, 0, 0.1);
     color: var(--color-primary);
+    border: 1px solid rgba(255, 85, 0, 0.3);
 }
 
 .metricLabel {
@@ -150,11 +157,11 @@
     gap: 0.5rem;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(7, 56, 37, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(255, 85, 0, 0.3);
 }
 
 .saveBtn:hover {
-    background-color: #0a4f32;
+    background-color: var(--color-accent);
     transform: translateY(-2px);
 }
 
@@ -166,8 +173,8 @@
 }
 
 .orderCard {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     padding: 1.5rem;
     display: flex;
@@ -180,7 +187,7 @@
     align-items: flex-start;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .orderId {
@@ -211,7 +218,7 @@
 }
 
 .orderTypeBadge {
-    background: #e2e8f0;
+    background: rgba(255, 255, 255, 0.1);
     color: var(--color-text-muted);
     padding: 0.25rem 0.75rem;
     border-radius: var(--radius-full);
@@ -222,9 +229,9 @@
 }
 
 .itemsList {
-    background: white;
+    background: rgba(0, 0, 0, 0.2);
     border-radius: var(--radius-lg);
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--color-border);
     padding: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -234,7 +241,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .orderItem:last-child {

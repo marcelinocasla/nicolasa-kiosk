@@ -41,24 +41,37 @@
 }
 
 :root {
-  /* Colors extracted from Stitch HTML */
-  --color-primary: #073825;
-  --color-accent: #9DC44D; /* Using the menu selection accent */
-  --color-accent-light: #D1E68F; /* Using the home screen accent */
-  --color-background-light: #f6f8f7;
-  --color-background-dark: #11211b;
-  
-  --color-text-main: #0f172a; /* Slate 900 */
-  --color-text-muted: #64748b; /* Slate 500 */
+  /* Colors - Black/Orange Theme */
+  --color-primary: #FF5500;
+  /* Vibrant Orange */
+  --color-accent: #FF9500;
+  /* Amber/Light Orange */
+  --color-accent-light: #FFB74D;
+  /* Light Orange for highlights */
+
+  --color-background-light: #121212;
+  /* Deep Charcoal/Black */
+  --color-background-dark: #000000;
+  /* Pure Black */
+
+  --color-surface: #1E1E1E;
+  /* Dark Grey for Cards/Sidebars */
+  --color-border: #333333;
+  /* Dark Border */
+
+  --color-text-main: #FFFFFF;
+  /* White text */
+  --color-text-muted: #A1A1AA;
+  /* Light Grey text */
   --color-white: #ffffff;
-  
+
   /* Border Radius */
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
-  
+
   /* Shadows */
-  --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -76,7 +89,12 @@ body {
   color: var(--color-text-main);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Santana', sans-serif;
 }
 
@@ -86,19 +104,38 @@ a {
 }
 
 /* Utilities */
-.text-primary { color: var(--color-primary); }
-.bg-primary { background-color: var(--color-primary); }
+.text-primary {
+  color: var(--color-primary);
+}
 
-.text-accent { color: var(--color-accent); }
-.bg-accent { background-color: var(--color-accent); }
+.bg-primary {
+  background-color: var(--color-primary);
+}
 
-.rounded-full { border-radius: var(--radius-full); }
-.rounded-xl { border-radius: var(--radius-xl); }
-.shadow-card { box-shadow: var(--shadow-card); }
+.text-accent {
+  color: var(--color-accent);
+}
+
+.bg-accent {
+  background-color: var(--color-accent);
+}
+
+.rounded-full {
+  border-radius: var(--radius-full);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
 
 .container {
   width: 100%;
-  max-width: 1200px; /* or whatever max width */
+  max-width: 1200px;
+  /* or whatever max width */
   margin: 0 auto;
   padding: 1rem;
 }

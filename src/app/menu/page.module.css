@@ -7,11 +7,11 @@
 
 .sidebar {
     width: 120px;
-    background-color: white;
+    background-color: var(--color-surface);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid var(--color-border);
     padding-top: 2rem;
     padding-bottom: 2rem;
     flex-shrink: 0;
@@ -31,8 +31,8 @@
 
 .navItemActive {
     color: var(--color-primary);
-    background-color: #f1f8f4;
-    /* Light green tint */
+    background-color: rgba(255, 85, 0, 0.1);
+    /* Orange tint */
     border-left-color: var(--color-primary);
 }
 
@@ -51,12 +51,13 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    background-color: var(--color-background-light);
 }
 
 .header {
     padding: 1.5rem 2rem;
-    background-color: white;
-    border-bottom: 1px solid #e2e8f0;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -81,10 +82,10 @@
 }
 
 .card {
-    background-color: white;
+    background-color: var(--color-surface);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s;
     border: 2px solid transparent;
     cursor: pointer;
@@ -99,12 +100,12 @@
 
 .cardSelected {
     border-color: var(--color-primary);
-    background-color: #f0fff4;
+    background-color: rgba(255, 85, 0, 0.1);
 }
 
 .cardImagePlaceholder {
     height: 180px;
-    background-color: #f1f5f9;
+    background-color: #2D2D2D;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -125,7 +126,7 @@
 
 .cardPrice {
     color: var(--color-accent);
-    /* Darker lime/olive for text visibility */
+    /* Orange for text visibility */
     font-weight: 700;
     font-size: 1.2rem;
 }
@@ -135,14 +136,14 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(30, 30, 30, 0.95);
     backdrop-filter: blur(10px);
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--color-border);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 .totalLabel {
@@ -173,12 +174,12 @@
 }
 
 .actionButton:hover {
-    background-color: #0a4f32;
+    background-color: var(--color-accent);
 }
 
 .backButton {
-    background-color: white;
-    border: 2px solid #e2e8f0;
+    background-color: transparent;
+    border: 2px solid var(--color-border);
     color: var(--color-text-muted);
     padding: 1rem 1.5rem;
     border-radius: var(--radius-full);
@@ -271,6 +272,7 @@
         /* Remove min-height enforcement */
         /* Allow up to 3 lines if needed, or stick to 2 but verify overflow */
         display: -webkit-box;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;

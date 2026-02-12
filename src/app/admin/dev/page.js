@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Save, ArrowLeft, RefreshCw, Home } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -191,7 +191,7 @@ export default function DevPanel() {
                                     </div>
 
                                     <div className={styles.itemsList}>
-                                        {order.items && order.items.map((item, idx) => (
+                                        {(order.items || []).map((item, idx) => (
                                             <div key={idx} className={styles.orderItem}>
                                                 <div className={styles.itemInfo}>
                                                     <span className={styles.itemQty}>{item.quantity}</span>

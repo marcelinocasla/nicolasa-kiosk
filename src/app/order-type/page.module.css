@@ -30,7 +30,7 @@
 }
 
 .card {
-    background-color: white;
+    background-color: var(--color-surface);
     border: 3px solid transparent;
     border-radius: var(--radius-xl);
     padding: 3rem;
@@ -56,8 +56,8 @@
 .iconWrapper {
     width: 120px;
     height: 120px;
-    background-color: #f0fdf4;
-    /* Light green tint */
+    background-color: rgba(255, 85, 0, 0.1);
+    /* Orange tint */
     border-radius: 50%;
     display: flex;
     align-items: center;

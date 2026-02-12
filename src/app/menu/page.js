@@ -182,7 +182,15 @@ function MenuContent() {
                                 onClick={() => toggleIngredient(product)}
                             >
                                 <div className={styles.cardImagePlaceholder}>
-                                    {CATEGORY_ICONS[product.category] || <Utensils size={48} />}
+                                    {product.image ? (
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        CATEGORY_ICONS[product.category] || <Utensils size={48} />
+                                    )}
                                 </div>
                                 <div className={styles.cardContent}>
                                     <h3 className={styles.cardName}>{product.name}</h3>

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Save, ArrowLeft, Plus, Trash2, RefreshCw, Home, ChevronUp, ChevronDown, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import styles from './page.module.css'
 
 export default function OwnerPanel() {
@@ -54,9 +55,14 @@ export default function OwnerPanel() {
             const data = await res.json()
 
             if (Array.isArray(data)) {
-                // If in history mode, sort by ID descending (newest first) or Date
-                // The API already orders by created_at desc
-                setOrders(data)
+                // If history tab, filter out pending orders (show only completed/cancelled)
+                // If filtering logic should be strictly "Finalizados", we might only want 'completed'
+                // But usually history implies everything past.
+                if (activeTab === 'history') {
+                    setOrders(data.filter(o => o.status !== 'pending'))
+                } else {
+                    setOrders(data)
+                }
             } else {
                 console.error("Orders data is not an array:", data)
                 setOrders([])
@@ -347,7 +353,7 @@ export default function OwnerPanel() {
 
                         {orders.length === 0 ? (
                             <p style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
-                                No hay pedidos pendientes.
+                                {activeTab === 'orders' ? 'No hay pedidos pendientes.' : 'No hay pedidos en el historial.'}
                             </p>
                         ) : (
                             <div className={styles.orderGrid}>
@@ -383,7 +389,7 @@ export default function OwnerPanel() {
                                         </div>
 
                                         <div className={styles.itemsList}>
-                                            {order.items && order.items.map((item, idx) => (
+                                            {(order.items || []).map((item, idx) => (
                                                 <div key={idx} className={styles.dishGroup}>
                                                     {/* NEW STRUCTURE: Dish with ingredients */}
                                                     {item.ingredients ? (
@@ -461,8 +467,83 @@ export default function OwnerPanel() {
 }
 
 function ProductRow({ product, updateProduct }) {
+    const [uploading, setUploading] = useState(false)
+    const fileInputRef = useRef(null)
+
+    const handleImageUpload = async (e) => {
+        try {
+            setUploading(true)
+            const file = e.target.files[0]
+            if (!file) return
+
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${product.id}-${Date.now()}.${fileExt}`
+            const filePath = `${fileName}`
+
+            const { error: uploadError } = await supabase.storage
+                .from('Ingredientes')
+                .upload(filePath, file)
+
+            if (uploadError) {
+                throw uploadError
+            }
+
+            const { data } = supabase.storage
+                .from('Ingredientes')
+                .getPublicUrl(filePath)
+
+            updateProduct(product.id, 'image', data.publicUrl)
+            alert('Imagen subida correctamente!')
+        } catch (error) {
+            console.error('Error uploading image:', error)
+            alert('Error al subir imagen!')
+        } finally {
+            setUploading(false)
+        }
+    }
+
     return (
         <div className={styles.productRow}>
+            <div className={styles.fieldGroup}>
+                <label className={styles.label}>Imagen</label>
+                <div className={styles.imageUploadWrapper}>
+                    {product.image ? (
+                        <div className={styles.imagePreviewContainer}>
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className={styles.productImagePreview}
+                            />
+                            <button
+                                className={styles.removeImageBtn}
+                                onClick={() => updateProduct(product.id, 'image', '')}
+                                title="Eliminar imagen"
+                            >
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className={styles.noImagePlaceholder}>Sin imagen</div>
+                    )}
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className={styles.hiddenInput}
+                        ref={fileInputRef}
+                    />
+                    <button
+                        className={styles.uploadBtn}
+                        onClick={() => fileInputRef.current.click()}
+                        disabled={uploading}
+                    >
+                        {uploading ? 'Subiendo...' : (product.image ? 'Cambiar Imagen' : 'Subir Imagen')}
+                    </button>
+                </div>
+            </div>
+
             <div className={styles.fieldGroup}>
                 <label className={styles.label}>Nombre</label>
                 <input

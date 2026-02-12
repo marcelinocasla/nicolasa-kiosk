@@ -10,7 +10,7 @@
 }
 
 .header {
-    background: white;
+    background: var(--color-surface);
     padding: 1.5rem 2rem;
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-card);
@@ -21,6 +21,7 @@
     top: 1rem;
     z-index: 10;
     margin-bottom: 2rem;
+    border: 1px solid var(--color-border);
 }
 
 /* Order Management Styles - Dark Urban Premium */
@@ -31,8 +32,8 @@
 }
 
 .orderCard {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     backdrop-filter: blur(10px);
     border-radius: var(--radius-xl);
     padding: 1.5rem;
@@ -43,8 +44,8 @@
 
 .orderCard:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    border-color: var(--color-primary);
 }
 
 .cardHeader {
@@ -53,7 +54,7 @@
     align-items: flex-start;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .orderId {
@@ -84,7 +85,7 @@
 }
 
 .orderTypeBadge {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 85, 0, 0.1);
     color: var(--color-accent);
     padding: 0.25rem 0.75rem;
     border-radius: var(--radius-full);
@@ -195,16 +196,14 @@
     border-radius: var(--radius-full);
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(7, 56, 37, 0.3);
+    box-shadow: 0 4px 10px rgba(255, 85, 0, 0.3);
     transition: all 0.2s;
 }
 
 .btnComplete:hover {
-    background: #0a4f32;
+    background: var(--color-accent);
     transform: translateY(-2px);
 }
-
-
 
 .headerLeft {
     display: flex;
@@ -216,8 +215,8 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 2px solid #e2e8f0;
-    background: white;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -246,9 +245,10 @@
 
 .tabSwitcher {
     display: flex;
-    background: #f1f5f9;
+    background: rgba(0, 0, 0, 0.3);
     padding: 4px;
     border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
 }
 
 .tabBtn {
@@ -264,9 +264,9 @@
 }
 
 .activeTab {
-    background: white;
-    color: var(--color-text-main);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .deliveryStatus {
@@ -316,19 +316,20 @@
     border: none;
     cursor: pointer;
     transition: transform 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(7, 56, 37, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(255, 85, 0, 0.3);
 }
 
 .saveBtn:hover {
     transform: translateY(-2px);
-    background-color: #0a4f32;
+    background-color: var(--color-accent);
 }
 
 .mainCard {
-    background: white;
+    background: var(--color-surface);
     padding: 2rem;
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border);
 }
 
 .sectionTitle {
@@ -349,16 +350,16 @@
     grid-template-columns: 1fr;
     gap: 1rem;
     padding: 1.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background-color: #f8fafc;
+    background-color: rgba(255, 255, 255, 0.05);
     align-items: flex-start;
     transition: all 0.2s;
 }
 
 .productRow:hover {
-    background-color: #f1f8f4;
-    border-color: var(--color-accent);
+    background-color: rgba(255, 85, 0, 0.05);
+    border-color: var(--color-primary);
 }
 
 /* Mobile Fixes */
@@ -394,7 +395,7 @@
     .deliveryStatus {
         justify-content: space-between;
         width: 100%;
-        background: #f8fafc;
+        background: rgba(0, 0, 0, 0.2);
         padding: 0.5rem 1rem;
         border-radius: var(--radius-lg);
     }
@@ -462,10 +463,12 @@
 
 .input {
     padding: 0.5rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     font-size: 0.9rem;
     font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
 }
 
 .inputMain {
@@ -474,12 +477,14 @@
 
 .textArea {
     padding: 0.5rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     font-size: 0.9rem;
     resize: none;
     height: 70px;
     font-family: 'SF Pro Display', sans-serif;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
 }
 
 .priceInput {
@@ -499,6 +504,7 @@
     font-size: 0.85rem;
     font-weight: 600;
     user-select: none;
+    color: var(--color-text-main);
 }
 
 .historyTitle {
@@ -535,11 +541,13 @@
 
 .searchInput {
     padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
     width: 250px;
     font-size: 0.9rem;
     transition: all 0.2s;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
 }
 
 .searchInput:focus {
@@ -553,7 +561,7 @@
     align-items: center;
     gap: 0.5rem;
     background: var(--color-accent);
-    color: var(--color-primary);
+    color: var(--color-background-dark);
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius-full);
     font-weight: 700;
@@ -578,7 +586,7 @@
     justify-content: space-between;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border);
 }
 
 .categoryTitleWrapper {
@@ -599,7 +607,7 @@
 }
 
 .orderBtn {
-    background: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
     border: none;
     padding: 0.25rem;
     border-radius: 4px;
@@ -612,11 +620,111 @@
 }
 
 .orderBtn:hover:not(:disabled) {
-    background: #e2e8f0;
+    background: rgba(255, 255, 255, 0.1);
     color: var(--color-primary);
 }
 
 .orderBtn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
+}
+
+.imageUploadWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.productImagePreview {
+    border: 1px solid var(--color-border);
+    transition: transform 0.2s;
+}
+
+.productImagePreview:hover {
+    transform: scale(1.5);
+    z-index: 10;
+}
+
+.fileInput {
+    max-width: 200px;
+    color: var(--color-text-muted);
+}
+
+.hiddenInput {
+    display: none;
+}
+
+.uploadBtn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--color-text-main);
+}
+
+.uploadBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.uploadBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.imagePreviewContainer {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.5rem;
+}
+
+.productImagePreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+}
+
+.removeImageBtn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--color-surface);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.removeImageBtn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.noImagePlaceholder {
+    width: 60px;
+    height: 60px;
+    border: 1px dashed var(--color-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
 }
