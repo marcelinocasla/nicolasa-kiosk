@@ -284,8 +284,28 @@ function MenuContent() {
                                         ) : (
                                             product.category === 'Salsas' ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <span className={styles.cardPrice}>${product.price}</span>
-                                                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>(Extra)</span>
+                                                    {(() => {
+                                                        const totalSalsas = products
+                                                            .filter(p => p.category === 'Salsas')
+                                                            .reduce((acc, p) => acc + (currentDishIngredients[String(p.id)] || 0), 0);
+
+                                                        const isSelected = (currentDishIngredients[String(product.id)] || 0) > 0;
+
+                                                        if (totalSalsas === 0) {
+                                                            return <span className={styles.cardPrice} style={{ color: '#10b981' }}>Sin Cargo</span>;
+                                                        }
+
+                                                        if (totalSalsas === 1 && isSelected) {
+                                                            return <span className={styles.cardPrice} style={{ color: '#10b981' }}>Sin Cargo</span>;
+                                                        }
+
+                                                        return (
+                                                            <>
+                                                                <span className={styles.cardPrice}>${product.price}</span>
+                                                                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>(Extra)</span>
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </div>
                                             ) : (
                                                 <span className={styles.cardPrice}>${product.price}</span>
