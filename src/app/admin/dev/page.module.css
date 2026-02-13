@@ -121,7 +121,7 @@
     border: 1px solid rgba(30, 64, 175, 0.3);
 }
 
-.metricCardGreen {
+.metricCardOrange {
     background-color: rgba(255, 85, 0, 0.1);
     color: var(--color-primary);
     border: 1px solid rgba(255, 85, 0, 0.3);

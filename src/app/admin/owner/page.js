@@ -368,16 +368,20 @@ export default function OwnerPanel() {
                             <div className={styles.ordersGrid}>
                                 {(view === 'orders' ? pendingOrders : orders).length === 0 ? (
                                     <div className={styles.emptyState}>
-                                        <ShoppingBag size={48} />
-                                        <p>No hay pedidos {view === 'orders' ? 'pendientes' : 'en el historial'}.</p>
+                                        <Clock size={48} />
+                                        <p>No hay registro de pedidos {view === 'orders' ? 'pendientes' : ''}.</p>
                                     </div>
                                 ) : (
                                     (view === 'orders' ? pendingOrders : orders).map(order => (
-                                        <div key={order.id} className={`${styles.orderCard} ${order.was_edited ? styles.orderEdited : ''}`}>
+                                        <div key={order.id} className={`${styles.orderCard} ${order.was_edited ? styles.orderEdited : ''} ${styles['status-' + order.status]}`}>
                                             <div className={styles.orderHeader}>
                                                 <div className={styles.orderIdGroup}>
                                                     <span className={styles.orderId}>#{order.id}</span>
-                                                    <span className={styles.orderTime}>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    <span className={styles.orderTime}>
+                                                        {new Date(order.created_at).toLocaleString('es-AR', {
+                                                            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+                                                        })}
+                                                    </span>
                                                 </div>
                                                 <span className={`${styles.orderType} ${order.order_type === 'eat-in' ? styles.typeMesa : styles.typeDelivery}`}>
                                                     {order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}
@@ -398,6 +402,7 @@ export default function OwnerPanel() {
                                                         </div>
                                                         <div className={styles.itemRight}>
                                                             <span className={styles.itemPrice}>${((item.price || item.total || 0) * (item.quantity || 1)).toLocaleString()}</span>
+                                                            {/* Allow deleting items only in 'orders' view (active orders) */}
                                                             {view === 'orders' && (
                                                                 <button onClick={() => removeOrderItem(order, idx)} className={styles.deleteBtn}>
                                                                     <Trash2 size={14} />
@@ -424,8 +429,8 @@ export default function OwnerPanel() {
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <div className={styles.orderStatusBadge}>
-                                                        {order.status === 'completed' ? 'Completado' : 'Cancelado'}
+                                                    <div className={`${styles.orderStatusBadge} ${styles[order.status]}`}>
+                                                        {order.status === 'pending' ? 'Pendiente' : (order.status === 'completed' ? 'Completado' : 'Cancelado')}
                                                     </div>
                                                 )}
                                             </div>

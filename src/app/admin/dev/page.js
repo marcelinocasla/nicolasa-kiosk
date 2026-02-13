@@ -138,7 +138,7 @@ export default function DevPanel() {
                                 <div className={styles.metricLabel}>Total Pedidos (Histórico)</div>
                                 <div className={styles.metricValue}>{metrics.orders}</div>
                             </div>
-                            <div className={`${styles.metricCard} ${styles.metricCardGreen}`}>
+                            <div className={`${styles.metricCard} ${styles.metricCardOrange}`}>
                                 <div className={styles.metricLabel}>Ingresos Totales (Completados)</div>
                                 <div className={styles.metricValue}>${(metrics.revenue).toLocaleString()}</div>
                             </div>
