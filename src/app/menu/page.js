@@ -279,15 +279,29 @@ function MenuContent() {
                                 <div className={styles.cardContent}>
                                     <h3 className={styles.cardName}>{product.name}</h3>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span className={styles.cardPrice}>${product.price}</span>
+                                        {['Guarniciones', 'Ensaladas'].includes(product.category) ? (
+                                            <span className={styles.cardPrice} style={{ fontSize: '0.9rem', color: '#10b981' }}>Incluido</span>
+                                        ) : (
+                                            product.category === 'Salsas' ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span className={styles.cardPrice}>${product.price}</span>
+                                                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>(Extra)</span>
+                                                </div>
+                                            ) : (
+                                                <span className={styles.cardPrice}>${product.price}</span>
+                                            )
+                                        )}
+
                                         {qty > 0 && (
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                {/* Only show minus button if NOT single-select category, OR if we want to allow deselecting the single item */}
+                                                {/* Actually allow deselecting always is good UX */}
                                                 <button
                                                     style={{ background: '#cbd5e1', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                                                     onClick={(e) => removeIngredient(e, product)}
                                                 >-</button>
                                                 <div style={{ background: 'var(--color-primary)', color: 'white', padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem' }}>
-                                                    x{qty}
+                                                    {['Guarniciones', 'Ensaladas'].includes(product.category) ? <span style={{ fontSize: '10px' }}>✓</span> : `x${qty}`}
                                                 </div>
                                             </div>
                                         )}

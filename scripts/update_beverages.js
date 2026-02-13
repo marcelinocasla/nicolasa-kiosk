@@ -2,7 +2,7 @@ require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; // Or SERVICE_ROLE_KEY if needed for RLS, but ANON might work if policies allow
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('Missing Supabase credentials');
@@ -39,12 +39,7 @@ const beverages = [
 async function updateBeverages() {
     console.log('Starting beverage update...');
 
-    // 1. Delete existing beverages (optional, but cleaner to ensure no duplicates if names changed)
-    // Or we can upsert. Let's try upserting based on name? No, names might have changed.
-    // Safest for "resetting" the list is to delete all 'Bebidas' and re-insert.
-    // BUT be careful if there are other beverages not in this list. 
-    // User said "modify the list of beverages", implying this IS the list.
-
+    // 1. Delete existing beverages
     const { error: deleteError } = await supabase
         .from('products')
         .delete()
@@ -56,10 +51,16 @@ async function updateBeverages() {
     }
     console.log('Cleared old beverages.');
 
-    // 2. Insert new beverages
+    // 2. Insert new beverages WITH IDs
+    const timestamp = Date.now();
+    const beveragesWithIds = beverages.map((b, index) => ({
+        ...b,
+        id: timestamp + index // Generate unique ID
+    }));
+
     const { data, error: insertError } = await supabase
         .from('products')
-        .insert(beverages)
+        .insert(beveragesWithIds)
         .select();
 
     if (insertError) {
