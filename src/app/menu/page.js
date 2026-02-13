@@ -87,7 +87,47 @@ function MenuContent() {
         setCurrentDishIngredients(prev => {
             const newIngredients = { ...prev }
             const pId = String(product.id)
-            newIngredients[pId] = (newIngredients[pId] || 0) + 1
+            const cat = product.category
+
+            if (cat === 'Carnes') {
+                // Only 1 meat allowed? Usually base is just 1 meat.
+                // If user wants multiple meats, logic might differ. 
+                // Assuming standard flow: select 1 meat. 
+                // But current logic was just increment. Let's keep flexibility but fix other cats.
+                newIngredients[pId] = (newIngredients[pId] || 0) + 1
+            }
+            else if (cat === 'Guarniciones' || cat === 'Ensaladas') {
+                // Rules: "el cliente puede elegir solo una opcion en cada categoria."
+                // So we must remove any other item of this category.
+                // 1. Find existing item of this category in selection
+                const existingId = Object.keys(newIngredients).find(id => {
+                    const p = products.find(prod => String(prod.id) === id)
+                    return p && p.category === cat
+                })
+
+                // 2. If exists, remove it (unless it's the same one, then maybe toggle off? 
+                // but usually clicking same again increases qty. 
+                // "Solo una opcion" mostly implies Qty 1 of 1 distinct item.
+                if (existingId) {
+                    delete newIngredients[existingId]
+                }
+
+                // 3. Add new one (Qty 1)
+                // If we clicked the same one, step 2 removed it, so this toggles it back on (effectively reset to 1).
+                // If we want toggle OFF behavior, we check if existingId === pId. 
+                // Let's assume click = select.
+                newIngredients[pId] = 1
+            }
+            else if (cat === 'Salsas') {
+                // "Lo unico que puede agregar de más, son las salsas"
+                // So multiple salsas allowed. Just increment/toggle.
+                newIngredients[pId] = (newIngredients[pId] || 0) + 1
+            }
+            else {
+                // Drinks etc
+                newIngredients[pId] = (newIngredients[pId] || 0) + 1
+            }
+
             localStorage.setItem('current_dish_ingredients', JSON.stringify(newIngredients))
             return newIngredients
         })
@@ -95,7 +135,7 @@ function MenuContent() {
 
     // Helper to remove/decrease
     const removeIngredient = (e, product) => {
-        e.stopPropagation() // Prevent triggering card click
+        e.stopPropagation()
         setCurrentDishIngredients(prev => {
             const newIngredients = { ...prev }
             const pId = String(product.id)
@@ -109,10 +149,54 @@ function MenuContent() {
     }
 
     const getTotal = () => {
-        return Object.entries(currentDishIngredients).reduce((total, [id, qty]) => {
+        let total = 0
+        let meatPrice = 0
+        let salsaCount = 0
+
+        Object.entries(currentDishIngredients).forEach(([id, qty]) => {
             const product = products.find(p => String(p.id) === String(id))
-            return total + (product ? product.price * qty : 0)
-        }, 0)
+            if (!product) return
+
+            if (product.category === 'Carnes') {
+                meatPrice += product.price * qty
+            } else if (product.category === 'Guarniciones' || product.category === 'Ensaladas') {
+                // "1 item incluido" -> FREE if it's the single allowed item.
+                // Since logic enforces only 1, it's free.
+                // UNLESS... logic implies base price covers it only if meat is selected? 
+                // "cuando el cliente eliga su primer carne... incluyen 1 item"
+                // Yes, assuming meat is the base.
+                // Price = 0 for these.
+            } else if (product.category === 'Salsas') {
+                // "cada salsa vale $500 ARS c/u"
+                // "incluyen 1 item... de cada categoría"
+                // So 1st salsa is free? 
+                // User said: "las categorías siguientes incluyen 1 item incluido... Lo unico que puede agregar de más, son las salsas"
+                // This implies 1st salsa free, subsequent $500.
+                for (let i = 0; i < qty; i++) {
+                    salsaCount++
+                    // First salsa of the ENTIRE dish (across all salsa types) is free?
+                    // "incluyen 1 item incluido de cada categoría" -> Yes, 1st salsa free.
+                }
+            } else {
+                // Drinks etc, normal price
+                total += product.price * qty
+            }
+        })
+
+        // Add meat price
+        total += meatPrice
+
+        // Calc Salsas
+        // 1st is free, rest $500
+        if (salsaCount > 0) {
+            // total += 0 (for first)
+            const extraSalsas = salsaCount - 1
+            if (extraSalsas > 0) {
+                total += extraSalsas * 500
+            }
+        }
+
+        return total
     }
 
     const handleContinue = () => {
