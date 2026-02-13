@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Save, ArrowLeft, Plus, Trash2, RefreshCw, Home, ChevronUp, ChevronDown, Search } from 'lucide-react'
+import { Save, ArrowLeft, Plus, Trash2, RefreshCw, Home, ChevronUp, ChevronDown, Search, Menu, Clock, DollarSign, ShoppingBag, X, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import styles from './page.module.css'
@@ -12,7 +12,7 @@ export default function OwnerPanel() {
     const [settings, setSettings] = useState(null)
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState('products') // 'products' or 'orders'
+    const [view, setView] = useState('dashboard') // 'dashboard', 'products', 'orders', 'history'
     const [searchTerm, setSearchTerm] = useState('')
     const [categoryOrder, setCategoryOrder] = useState([])
 
@@ -20,53 +20,44 @@ export default function OwnerPanel() {
         Promise.all([
             fetch('/api/products').then(res => res.json()),
             fetch('/api/settings').then(res => res.json()),
-            fetch('/api/orders?status=pending').then(res => res.json())
+            fetch('/api/orders?status=all').then(res => res.json())
         ]).then(([productsData, settingsData, ordersData]) => {
             setProducts(productsData)
             setSettings(settingsData)
             setCategoryOrder(settingsData.categoryOrder || [])
-            if (Array.isArray(ordersData)) {
-                setOrders(ordersData)
-            } else {
-                setOrders([])
-            }
-            setLoading(false)
+            setOrders(Array.isArray(ordersData) ? ordersData : [])
             setLoading(false)
         })
             .catch(err => {
                 console.error("Error loading owner data:", err)
                 setLoading(false)
-                alert("Error cargando datos del panel. Revisa la consola.")
+                // alert("Error cargando datos del panel. Revisa la consola.") // Suppress for cleaner UX
             })
     }, [])
 
-    // ... (keep auto-refresh effect) ... 
+    // Polling for new orders every 15 seconds
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/orders?status=all&t=${Date.now()}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    setOrders(Array.isArray(data) ? data : [])
+                }
+            } catch (e) {
+                console.error("Auto-refresh error", e)
+            }
+        }, 15000)
+        return () => clearInterval(interval)
+    }, [])
 
     const refreshOrders = async () => {
         try {
-            setLoading(true) // Show loading state when refreshing
-            // If activeTab is 'history', fetch all. Else fetch pending.
-            const statusParam = activeTab === 'history' ? 'all' : 'pending'
-
-            // Add timestamp to prevent caching
-            const res = await fetch(`/api/orders?status=${statusParam}&t=${Date.now()}`)
-
+            setLoading(true)
+            const res = await fetch(`/api/orders?status=all&t=${Date.now()}`)
             if (!res.ok) throw new Error('Failed to fetch orders')
             const data = await res.json()
-
-            if (Array.isArray(data)) {
-                // If history tab, filter out pending orders (show only completed/cancelled)
-                // If filtering logic should be strictly "Finalizados", we might only want 'completed'
-                // But usually history implies everything past.
-                if (activeTab === 'history') {
-                    setOrders(data.filter(o => o.status !== 'pending'))
-                } else {
-                    setOrders(data)
-                }
-            } else {
-                console.error("Orders data is not an array:", data)
-                setOrders([])
-            }
+            setOrders(Array.isArray(data) ? data : [])
         } catch (error) {
             console.error("Error refreshing orders:", error)
         } finally {
@@ -74,25 +65,14 @@ export default function OwnerPanel() {
         }
     }
 
-    // Refresh when tab changes
-    useEffect(() => {
-        if (activeTab === 'orders' || activeTab === 'history') {
-            refreshOrders()
-        }
-    }, [activeTab])
-
-
     const saveProducts = async (newProducts) => {
         await fetch('/api/products/update', {
             method: 'POST',
             body: JSON.stringify(newProducts)
         })
-
-        // Also save settings to persist category order
         if (settings) {
             await saveSettings({ ...settings, categoryOrder })
         }
-
         setProducts(newProducts)
     }
 
@@ -115,7 +95,6 @@ export default function OwnerPanel() {
 
     const updateOrderStatus = async (orderId, newStatus) => {
         if (newStatus === 'cancelled' && !confirm('¿Estás seguro de cancelar este pedido?')) return;
-
         await fetch('/api/orders', {
             method: 'PUT',
             body: JSON.stringify({ id: orderId, status: newStatus })
@@ -126,20 +105,12 @@ export default function OwnerPanel() {
     const removeOrderItem = async (order, itemIndex) => {
         const newItems = [...order.items];
         newItems.splice(itemIndex, 1);
-
         const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity || 0), 0);
-
         await fetch('/api/orders', {
             method: 'PUT',
-            body: JSON.stringify({
-                id: order.id,
-                items: newItems,
-                total: newTotal,
-                was_edited: true // Flag as edited
-            })
+            body: JSON.stringify({ id: order.id, items: newItems, total: newTotal, was_edited: true })
         })
         refreshOrders()
-        alert('Item eliminado del pedido');
     }
 
     const handleSaveAll = () => {
@@ -148,53 +119,27 @@ export default function OwnerPanel() {
     }
 
     const moveCategory = (category, direction) => {
-        // Get unique categories from products to ensure we have all of them
         const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
-
-        // Merge with existing order, appending any new ones at the end
         let currentOrder = [...categoryOrder]
-        uniqueCategories.forEach(c => {
-            if (!currentOrder.includes(c)) currentOrder.push(c)
-        })
-
-        // Remove any that no longer exist
+        uniqueCategories.forEach(c => { if (!currentOrder.includes(c)) currentOrder.push(c) })
         currentOrder = currentOrder.filter(c => uniqueCategories.includes(c))
-
         const index = currentOrder.indexOf(category)
         if (index === -1) return
-
         const newOrder = [...currentOrder]
-        if (direction === 'up' && index > 0) {
-            [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]]
-        } else if (direction === 'down' && index < newOrder.length - 1) {
-            [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]]
-        }
-
+        if (direction === 'up' && index > 0) [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]]
+        else if (direction === 'down' && index < newOrder.length - 1) [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]]
         setCategoryOrder(newOrder)
     }
 
     const addNewProduct = () => {
-        const newProduct = {
-            id: Date.now(), // Temporary ID until DB assigns one (or handle differently)
-            name: '',
-            category: 'Nuevos',
-            description: '',
-            price: 0,
-            available: true
-        }
+        const newProduct = { id: Date.now(), name: '', category: 'Nuevos', description: '', price: 0, available: true }
         setProducts([newProduct, ...products])
     }
 
-    // Derived state for rendering
     const getSortedCategories = () => {
         const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
-
-        // Combine known order with any un-ordered categories appended
         const sorted = [...categoryOrder]
-        uniqueCategories.forEach(c => {
-            if (!sorted.includes(c)) sorted.push(c)
-        })
-
+        uniqueCategories.forEach(c => { if (!sorted.includes(c)) sorted.push(c) })
         return sorted.filter(c => uniqueCategories.includes(c))
     }
 
@@ -203,85 +148,162 @@ export default function OwnerPanel() {
         p.category.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    if (loading) return <div className="p-8 text-center">Cargando...</div>
+    // DASHBOARD METRICS
+    const pendingOrders = orders.filter(o => o.status === 'pending')
+
+    // Check local timezone for "Today" calculation
+    const today = new Date();
+    const isSameDay = (d1, d2) => {
+        return d1.getFullYear() === d2.getFullYear() &&
+            d1.getMonth() === d2.getMonth() &&
+            d1.getDate() === d2.getDate();
+    }
+
+    const salesToday = orders
+        .filter(o => o.status === 'completed' && isSameDay(new Date(o.created_at), today))
+        .reduce((sum, o) => sum + (o.total || 0), 0)
+
+    if (loading) return <div className={styles.loadingState}>Cargando Panel...</div>
 
     return (
         <div className={styles.container}>
-            <div className={styles.content}>
-
-                {/* Header & Delivery Toggle */}
-                <div className={styles.header}>
-                    <div className={styles.headerLeft}>
-                        <button onClick={() => router.push('/')} className={styles.backBtn} title="Ir al Inicio">
-                            <Home />
-                        </button>
-                        <button onClick={() => router.push('/admin')} className={styles.backBtn} title="Volver al Admin">
-                            <ArrowLeft />
-                        </button>
-                        <h1 className={styles.title}>Panel del Dueño</h1>
-                    </div>
-
-                    <div className={styles.headerActions}>
-                        <div className={styles.tabSwitcher}>
-                            <button
-                                className={`${styles.tabBtn} ${activeTab === 'products' ? styles.activeTab : ''}`}
-                                onClick={() => setActiveTab('products')}
-                            >
-                                Productos
-                            </button>
-                            <button
-                                className={`${styles.tabBtn} ${activeTab === 'orders' ? styles.activeTab : ''}`}
-                                onClick={() => setActiveTab('orders')}
-                            >
-                                Pendientes
-                            </button>
-                            <button
-                                className={`${styles.tabBtn} ${activeTab === 'history' ? styles.activeTab : ''}`}
-                                onClick={() => setActiveTab('history')}
-                            >
-                                Historial (Finalizados)
-                            </button>
-                        </div>
-
-                        <div className={styles.deliveryStatus}>
-                            <span className={styles.statusLabel}>Mesa:</span>
-                            <button
-                                onClick={() => saveSettings({ ...settings, eatInEnabled: !settings.eatInEnabled })}
-                                className={`${styles.toggleBtn} ${settings.eatInEnabled ? styles.toggleOn : styles.toggleOff}`}
-                            >
-                                {settings.eatInEnabled ? 'ON' : 'OFF'}
-                            </button>
-                        </div>
-
-                        <div className={styles.deliveryStatus}>
-                            <span className={styles.statusLabel}>Delivery:</span>
-                            <button
-                                onClick={toggleDelivery}
-                                className={`${styles.toggleBtn} ${settings.deliveryEnabled ? styles.toggleOn : styles.toggleOff}`}
-                            >
-                                {settings.deliveryEnabled ? 'ON' : 'OFF'}
-                            </button>
-                        </div>
-
-                        {activeTab === 'products' && (
-                            <button
-                                onClick={handleSaveAll}
-                                className={styles.saveBtn}
-                            >
-                                <Save size={20} /> Guardar Todo
-                            </button>
-                        )}
-                    </div>
+            {/* SIDEBAR NAVIGATION */}
+            <aside className={styles.sidebar}>
+                <div className={styles.logoArea}>
+                    <h1 className={styles.logoText}>Nicolasa<span className={styles.dot}>.</span></h1>
                 </div>
 
-                {/* CONTENT AREA */}
-                {activeTab === 'products' ? (
-                    /* Product Management */
-                    <div className={styles.mainCard}>
-                        <div className={styles.productsHeader}>
-                            <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Gestionar Productos</h2>
+                <nav className={styles.navMenu}>
+                    <button
+                        className={`${styles.navItem} ${view === 'dashboard' ? styles.navItemActive : ''}`}
+                        onClick={() => setView('dashboard')}
+                    >
+                        <Home size={20} />
+                        <span>Resumen</span>
+                    </button>
+                    <button
+                        className={`${styles.navItem} ${view === 'orders' ? styles.navItemActive : ''}`}
+                        onClick={() => setView('orders')}
+                    >
+                        <ShoppingBag size={20} />
+                        <span>Pedidos</span>
+                        {pendingOrders.length > 0 && <span className={styles.badgeCount}>{pendingOrders.length}</span>}
+                    </button>
+                    <button
+                        className={`${styles.navItem} ${view === 'products' ? styles.navItemActive : ''}`}
+                        onClick={() => setView('products')}
+                    >
+                        <Menu size={20} />
+                        <span>Menú</span>
+                    </button>
+                    <button
+                        className={`${styles.navItem} ${view === 'history' ? styles.navItemActive : ''}`}
+                        onClick={() => setView('history')}
+                    >
+                        <Clock size={20} />
+                        <span>Historial</span>
+                    </button>
+                </nav>
 
-                            <div className={styles.productsActions}>
+                <div className={styles.sidebarFooter}>
+                    <button onClick={() => router.push('/')} className={styles.backBtn} title="Volver al Kiosco">
+                        <ArrowLeft size={18} />
+                        <span>Ir al Kiosco</span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* MAIN CONTENT AREA */}
+            <main className={styles.mainContent}>
+
+                {/* TOP HEADER */}
+                <header className={styles.topHeader}>
+                    <h2 className={styles.pageTitle}>
+                        {view === 'dashboard' && 'Panel de Control'}
+                        {view === 'orders' && 'Pedidos en Curso'}
+                        {view === 'products' && 'Gestión de Menú'}
+                        {view === 'history' && 'Historial de Ventas'}
+                    </h2>
+
+                    <div className={styles.statusControls}>
+                        <div className={styles.controlGroup}>
+                            <span className={styles.statusLabel}>Mesa</span>
+                            <button
+                                onClick={() => saveSettings({ ...settings, eatInEnabled: !settings.eatInEnabled })}
+                                className={`${styles.toggleBtn} ${settings?.eatInEnabled ? styles.toggleOn : styles.toggleOff}`}
+                            >
+                                <div className={styles.toggleHandle}></div>
+                            </button>
+                        </div>
+                        <div className={styles.controlGroup}>
+                            <span className={styles.statusLabel}>Delivery</span>
+                            <button
+                                onClick={toggleDelivery}
+                                className={`${styles.toggleBtn} ${settings?.deliveryEnabled ? styles.toggleOn : styles.toggleOff}`}
+                            >
+                                <div className={styles.toggleHandle}></div>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <div className={styles.scrollableContent}>
+
+                    {/* DASHBOARD VIEW */}
+                    {view === 'dashboard' && (
+                        <div className={styles.dashboardView}>
+                            <div className={styles.statsGrid}>
+                                <div className={`${styles.statCard} ${styles.statWarning}`}>
+                                    <div className={styles.statIcon}><ShoppingBag size={24} /></div>
+                                    <div className={styles.statInfo}>
+                                        <span className={styles.statLabel}>Pedidos Activos</span>
+                                        <span className={styles.statValue}>{pendingOrders.length}</span>
+                                    </div>
+                                    <button className={styles.statLink} onClick={() => setView('orders')}>Ver Todos</button>
+                                </div>
+                                <div className={`${styles.statCard} ${styles.statSuccess}`}>
+                                    <div className={styles.statIcon}><DollarSign size={24} /></div>
+                                    <div className={styles.statInfo}>
+                                        <span className={styles.statLabel}>Ventas Hoy</span>
+                                        <span className={styles.statValue}>${salesToday.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                <div className={`${styles.statCard} ${styles.statNeutral}`}>
+                                    <div className={styles.statIcon}><Menu size={24} /></div>
+                                    <div className={styles.statInfo}>
+                                        <span className={styles.statLabel}>Productos</span>
+                                        <span className={styles.statValue}>{products.length}</span>
+                                    </div>
+                                    <button className={styles.statLink} onClick={() => setView('products')}>Gestionar</button>
+                                </div>
+                            </div>
+
+                            <div className={styles.recentActivity}>
+                                <h3 className={styles.sectionTitle}>Actividad Reciente</h3>
+                                <div className={styles.recentList}>
+                                    {orders.slice(0, 5).map(order => (
+                                        <div key={order.id} className={styles.activityRow}>
+                                            <div className={styles.activityInfo}>
+                                                <span className={styles.activityId}>#{order.id}</span>
+                                                <span className={styles.activityName}>{order.customer_name}</span>
+                                            </div>
+                                            <span className={`${styles.activityStatus} ${styles[order.status]}`}>
+                                                {order.status === 'pending' ? 'Pendiente' : (order.status === 'completed' ? 'Completado' : 'Cancelado')}
+                                            </span>
+                                            <span className={styles.activityTime}>
+                                                {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* PRODUCTS VIEW */}
+                    {view === 'products' && (
+                        <div className={styles.productsView}>
+                            <div className={styles.toolbar}>
                                 <div className={styles.searchWrapper}>
                                     <Search size={18} className={styles.searchIcon} />
                                     <input
@@ -292,176 +314,129 @@ export default function OwnerPanel() {
                                         onChange={e => setSearchTerm(e.target.value)}
                                     />
                                 </div>
-                                <button onClick={addNewProduct} className={styles.addBtn}>
-                                    <Plus size={18} /> Nuevo Producto
-                                </button>
+                                <div className={styles.toolbarActions}>
+                                    <button onClick={addNewProduct} className={styles.primaryBtn}>
+                                        <Plus size={18} /> Nuevo
+                                    </button>
+                                    <button onClick={handleSaveAll} className={styles.secondaryBtn}>
+                                        <Save size={18} /> Guardar
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className={styles.productGrid}>
-                            {/* Group by Category if no search term, otherwise show flat list */}
-                            {searchTerm ? (
-                                filteredProducts.map(product => (
-                                    <ProductRow key={product.id} product={product} updateProduct={updateProduct} />
-                                ))
-                            ) : (
-                                getSortedCategories().map((category, catIdx) => (
-                                    <div key={category} className={styles.categorySection}>
-                                        <div className={styles.categoryHeader}>
-                                            <div className={styles.categoryTitleWrapper}>
+                            <div className={styles.productsContainer}>
+                                {searchTerm ? (
+                                    filteredProducts.map(product => (
+                                        <ProductRow key={product.id} product={product} updateProduct={updateProduct} />
+                                    ))
+                                ) : (
+                                    getSortedCategories().map((category, catIdx) => (
+                                        <div key={category} className={styles.categoryGroup}>
+                                            <div className={styles.categoryHeader}>
                                                 <h3 className={styles.categoryTitle}>{category}</h3>
-                                                <div className={styles.categoryControls}>
-                                                    <button
-                                                        onClick={() => moveCategory(category, 'up')}
-                                                        className={styles.orderBtn}
-                                                        disabled={catIdx === 0}
-                                                    >
-                                                        <ChevronUp size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => moveCategory(category, 'down')}
-                                                        className={styles.orderBtn}
-                                                        disabled={catIdx === getSortedCategories().length - 1}
-                                                    >
-                                                        <ChevronDown size={16} />
-                                                    </button>
+                                                <div className={styles.categoryActions}>
+                                                    <button onClick={() => moveCategory(category, 'up')} className={styles.moveBtn} disabled={catIdx === 0}><ChevronUp size={16} /></button>
+                                                    <button onClick={() => moveCategory(category, 'down')} className={styles.moveBtn} disabled={catIdx === getSortedCategories().length - 1}><ChevronDown size={16} /></button>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        {products.filter(p => p.category === category).map(product => (
-                                            <ProductRow key={product.id} product={product} updateProduct={updateProduct} />
-                                        ))}
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        <datalist id="categories">
-                            {Array.from(new Set(products.map(p => p.category))).map(c => <option key={c} value={c} />)}
-                        </datalist>
-                    </div>
-                ) : (
-                    /* ORDER MANAGEMENT */
-                    <div className={styles.mainCard}>
-                        <div className={styles.header}>
-                            <h2 className={styles.sectionTitle}>Pedidos Pendientes</h2>
-                            <button onClick={refreshOrders} className={styles.toggleBtn}>
-                                <RefreshCw size={20} />
-                            </button>
-                        </div>
-
-                        {orders.length === 0 ? (
-                            <p style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
-                                {activeTab === 'orders' ? 'No hay pedidos pendientes.' : 'No hay pedidos en el historial.'}
-                            </p>
-                        ) : (
-                            <div className={styles.orderGrid}>
-                                {orders.map(order => (
-                                    <div key={order.id} className={styles.orderCard}>
-                                        <div className={styles.cardHeader}>
-                                            <div>
-                                                <h3 className={styles.orderId}>#{order.id}</h3>
-                                                <p className={styles.customerInfo}>{order.customer_name || 'Cliente'}</p>
-                                                <div className={styles.customerInfo} style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-                                                    {order.created_at ? new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                                                </div>
-                                                {order.customer_phone && (
-                                                    <p className={styles.customerInfo} style={{ color: 'var(--color-accent)' }}>
-                                                        {order.customer_phone}
-                                                    </p>
-                                                )}
-
-                                                {/* Status Indicators */}
-                                                <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
-                                                    {order.status === 'cancelled' && (
-                                                        <span style={{ background: '#ef4444', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>CANCELADO</span>
-                                                    )}
-                                                    {order.was_edited && (
-                                                        <span style={{ background: '#eab308', color: 'black', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>EDITADO</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className={styles.orderMeta}>
-                                                <p className={styles.orderTotal}>${(order.total || 0).toLocaleString()}</p>
-                                                <span className={styles.orderTypeBadge}>{order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}</span>
+                                            <div className={styles.productsGrid}>
+                                                {products.filter(p => p.category === category).map(product => (
+                                                    <ProductRow key={product.id} product={product} updateProduct={updateProduct} />
+                                                ))}
                                             </div>
                                         </div>
-
-                                        <div className={styles.itemsList}>
-                                            {(order.items || []).map((item, idx) => (
-                                                <div key={idx} className={styles.dishGroup}>
-                                                    {/* NEW STRUCTURE: Dish with ingredients */}
-                                                    {item.ingredients ? (
-                                                        <>
-                                                            <div className={styles.dishHeaderRow}>
-                                                                <span className={styles.dishName}>{item.dish_name || `Plato #${idx + 1}`}</span>
-                                                                <span className={styles.dishTotalDev}>${(item.dish_total || 0).toLocaleString()}</span>
-                                                                <button
-                                                                    onClick={() => removeOrderItem(order, idx)}
-                                                                    className={styles.deleteItemBtn}
-                                                                    title="Eliminar plato"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                            <div className={styles.ingredientsSubList}>
-                                                                {item.ingredients.map((ing, ingIdx) => (
-                                                                    <div key={ingIdx} className={styles.orderItem}>
-                                                                        <div className={styles.itemInfo}>
-                                                                            <span className={styles.itemQty}>{ing.quantity}</span>
-                                                                            <span className={styles.itemName}>{ing.name}</span>
-                                                                        </div>
-                                                                        <span className={styles.itemPrice}>${((ing.price || 0) * (ing.quantity || 1)).toLocaleString()}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        /* LEGACY STRUCTURE: Flat list or Dish with ingredients object (handled gracefully) */
-                                                        <div className={styles.orderItem}>
-                                                            <div className={styles.itemInfo}>
-                                                                <span className={styles.itemQty}>{item.quantity || 1}</span>
-                                                                <span className={styles.itemName}>{item.name || `Plato #${idx + 1}`}</span>
-                                                            </div>
-                                                            <div className={styles.itemActions}>
-                                                                <span className={styles.itemPrice}>${((item.price || item.total || 0) * (item.quantity || 1)).toLocaleString()}</span>
-                                                                <button
-                                                                    onClick={() => removeOrderItem(order, idx)}
-                                                                    className={styles.deleteItemBtn}
-                                                                    title="Eliminar item"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        <div className={styles.cardActions}>
-                                            <button
-                                                onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                                                className={styles.btnCancel}
-                                            >
-                                                Cancelar
-                                            </button>
-                                            <button
-                                                onClick={() => updateOrderStatus(order.id, 'completed')}
-                                                className={styles.btnComplete}
-                                            >
-                                                Completar Pedido
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
-                        )}
-                    </div>
-                )}
+                            <datalist id="categories">
+                                {Array.from(new Set(products.map(p => p.category))).map(c => <option key={c} value={c} />)}
+                            </datalist>
+                        </div>
+                    )}
 
-            </div>
+                    {/* ORDERS & HISTORY VIEW */}
+                    {(view === 'orders' || view === 'history') && (
+                        <div className={styles.ordersView}>
+                            {view === 'orders' && (
+                                <div className={styles.toolbar}>
+                                    <button onClick={refreshOrders} className={styles.secondaryBtn}>
+                                        <RefreshCw size={18} /> Actualizar
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className={styles.ordersGrid}>
+                                {(view === 'orders' ? pendingOrders : orders.filter(o => o.status !== 'pending')).length === 0 ? (
+                                    <div className={styles.emptyState}>
+                                        <ShoppingBag size={48} />
+                                        <p>No hay pedidos {view === 'orders' ? 'pendientes' : 'en el historial'}.</p>
+                                    </div>
+                                ) : (
+                                    (view === 'orders' ? pendingOrders : orders.filter(o => o.status !== 'pending')).map(order => (
+                                        <div key={order.id} className={`${styles.orderCard} ${order.was_edited ? styles.orderEdited : ''}`}>
+                                            <div className={styles.orderHeader}>
+                                                <div className={styles.orderIdGroup}>
+                                                    <span className={styles.orderId}>#{order.id}</span>
+                                                    <span className={styles.orderTime}>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                <span className={`${styles.orderType} ${order.order_type === 'eat-in' ? styles.typeMesa : styles.typeDelivery}`}>
+                                                    {order.order_type === 'eat-in' ? 'Mesa' : 'Delivery'}
+                                                </span>
+                                            </div>
+
+                                            <div className={styles.customerDetails}>
+                                                <span className={styles.customerName}>{order.customer_name || 'Cliente'}</span>
+                                                {order.customer_phone && <span className={styles.customerPhone}>{order.customer_phone}</span>}
+                                            </div>
+
+                                            <div className={styles.orderItems}>
+                                                {(order.items || []).map((item, idx) => (
+                                                    <div key={idx} className={styles.orderItemRow}>
+                                                        <div className={styles.itemMain}>
+                                                            <span className={styles.itemQty}>{item.quantity || 1}x</span>
+                                                            <span className={styles.itemName}>{item.name}</span>
+                                                        </div>
+                                                        <div className={styles.itemRight}>
+                                                            <span className={styles.itemPrice}>${((item.price || item.total || 0) * (item.quantity || 1)).toLocaleString()}</span>
+                                                            {view === 'orders' && (
+                                                                <button onClick={() => removeOrderItem(order, idx)} className={styles.deleteBtn}>
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className={styles.orderFooter}>
+                                                <div className={styles.orderTotalRow}>
+                                                    <span>Total</span>
+                                                    <span className={styles.orderTotalValue}>${(order.total || 0).toLocaleString()}</span>
+                                                </div>
+
+                                                {view === 'orders' ? (
+                                                    <div className={styles.orderActions}>
+                                                        <button onClick={() => updateOrderStatus(order.id, 'cancelled')} className={styles.btnCancel}>
+                                                            <X size={18} /> Cancelar
+                                                        </button>
+                                                        <button onClick={() => updateOrderStatus(order.id, 'completed')} className={styles.btnComplete}>
+                                                            <CheckCircle size={18} /> Listo
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className={styles.orderStatusBadge}>
+                                                        {order.status === 'completed' ? 'Completado' : 'Cancelado'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </main>
         </div>
     )
 }
@@ -484,16 +459,13 @@ function ProductRow({ product, updateProduct }) {
                 .from('Ingredientes')
                 .upload(filePath, file)
 
-            if (uploadError) {
-                throw uploadError
-            }
+            if (uploadError) throw uploadError
 
             const { data } = supabase.storage
                 .from('Ingredientes')
                 .getPublicUrl(filePath)
 
             updateProduct(product.id, 'image', data.publicUrl)
-            alert('Imagen subida correctamente!')
         } catch (error) {
             console.error('Error uploading image:', error)
             alert('Error al subir imagen!')
@@ -503,91 +475,69 @@ function ProductRow({ product, updateProduct }) {
     }
 
     return (
-        <div className={styles.productRow}>
-            <div className={styles.fieldGroup}>
-                <label className={styles.label}>Imagen</label>
-                <div className={styles.imageUploadWrapper}>
-                    {product.image ? (
-                        <div className={styles.imagePreviewContainer}>
-                            <img
-                                src={product.image}
-                                alt={product.name}
-                                className={styles.productImagePreview}
-                            />
-                            <button
-                                className={styles.removeImageBtn}
-                                onClick={() => updateProduct(product.id, 'image', '')}
-                                title="Eliminar imagen"
-                            >
-                                <Trash2 size={14} />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className={styles.noImagePlaceholder}>Sin imagen</div>
-                    )}
-
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                        className={styles.hiddenInput}
-                        ref={fileInputRef}
-                    />
-                    <button
-                        className={styles.uploadBtn}
-                        onClick={() => fileInputRef.current.click()}
-                        disabled={uploading}
-                    >
-                        {uploading ? 'Subiendo...' : (product.image ? 'Cambiar Imagen' : 'Subir Imagen')}
-                    </button>
-                </div>
+        <div className={styles.productCard}>
+            <div className={styles.imageArea} onClick={() => fileInputRef.current.click()}>
+                {product.image ? (
+                    <img src={product.image} alt={product.name} className={styles.productImg} />
+                ) : (
+                    <div className={styles.placeholderImg}>+ IMG</div>
+                )}
+                <div className={styles.imageOverlay}>{uploading ? '...' : <Plus size={20} />}</div>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className={styles.hiddenInput}
+                    ref={fileInputRef}
+                />
             </div>
 
-            <div className={styles.fieldGroup}>
-                <label className={styles.label}>Nombre</label>
+            <div className={styles.productDetails}>
+                <div className={styles.productHeader}>
+                    <input
+                        className={styles.inputName}
+                        value={product.name}
+                        placeholder="Nombre Producto"
+                        onChange={e => updateProduct(product.id, 'name', e.target.value)}
+                    />
+                    <div className={styles.switchWrapper}>
+                        <input
+                            type="checkbox"
+                            checked={product.available}
+                            onChange={() => updateProduct(product.id, 'available', !product.available)}
+                            className={styles.toggleCheckbox}
+                        />
+                    </div>
+                </div>
+
                 <input
-                    className={`${styles.input} ${styles.inputMain}`}
-                    value={product.name}
-                    onChange={e => updateProduct(product.id, 'name', e.target.value)}
-                />
-                <input
-                    className={styles.input}
-                    style={{ marginTop: '0.5rem' }}
+                    className={styles.inputCategory}
                     value={product.category}
-                    onChange={e => updateProduct(product.id, 'category', e.target.value)}
                     list="categories"
                     placeholder="Categoría"
+                    onChange={e => updateProduct(product.id, 'category', e.target.value)}
                 />
-            </div>
 
-            <div className={styles.fieldGroup}>
-                <label className={styles.label}>Descripción</label>
                 <textarea
-                    className={styles.textArea}
+                    className={styles.inputDesc}
                     value={product.description}
+                    placeholder="Descripción"
+                    rows={2}
                     onChange={e => updateProduct(product.id, 'description', e.target.value)}
                 />
-            </div>
 
-            <div className={styles.fieldGroup}>
-                <label className={styles.label}>Precio ($)</label>
-                <input
-                    type="number"
-                    className={`${styles.input} ${styles.priceInput}`}
-                    value={product.price}
-                    onChange={e => updateProduct(product.id, 'price', parseInt(e.target.value) || 0)}
-                />
-            </div>
-
-            <div className={styles.checkboxWrapper} onClick={() => updateProduct(product.id, 'available', !product.available)}>
-                <input
-                    type="checkbox"
-                    checked={product.available}
-                    onChange={() => { }} // handled by wrapper
-                    style={{ accentColor: 'var(--color-primary)' }}
-                />
-                <span className={styles.checkboxLabel}>Disponible</span>
+                <div className={styles.productFooter}>
+                    <div className={styles.priceWrapper}>
+                        <span className={styles.currency}>$</span>
+                        <input
+                            type="number"
+                            className={styles.inputPrice}
+                            value={product.price}
+                            onChange={e => updateProduct(product.id, 'price', parseInt(e.target.value) || 0)}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     )
