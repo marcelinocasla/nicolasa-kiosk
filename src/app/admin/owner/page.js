@@ -366,13 +366,13 @@ export default function OwnerPanel() {
                             )}
 
                             <div className={styles.ordersGrid}>
-                                {(view === 'orders' ? pendingOrders : orders.filter(o => o.status !== 'pending')).length === 0 ? (
+                                {(view === 'orders' ? pendingOrders : orders).length === 0 ? (
                                     <div className={styles.emptyState}>
                                         <ShoppingBag size={48} />
                                         <p>No hay pedidos {view === 'orders' ? 'pendientes' : 'en el historial'}.</p>
                                     </div>
                                 ) : (
-                                    (view === 'orders' ? pendingOrders : orders.filter(o => o.status !== 'pending')).map(order => (
+                                    (view === 'orders' ? pendingOrders : orders).map(order => (
                                         <div key={order.id} className={`${styles.orderCard} ${order.was_edited ? styles.orderEdited : ''}`}>
                                             <div className={styles.orderHeader}>
                                                 <div className={styles.orderIdGroup}>

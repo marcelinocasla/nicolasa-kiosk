@@ -24,7 +24,10 @@ export default function OrderSummary() {
             fetch('/api/products').then(res => res.json()),
             fetch('/api/settings').then(res => res.json())
         ]).then(([productsData, settingsData]) => {
-            setProducts(productsData)
+            // Inject virtual "Sin bebida" product
+            const noDrinkProduct = { id: 'no-drink', name: 'Sin bebida', price: 0, category: 'Bebidas' }
+            setProducts([...productsData, noDrinkProduct])
+
             if (settingsData.whatsappNumber) {
                 setSettings(prev => ({ ...prev, whatsappNumber: settingsData.whatsappNumber.replace('+', '') }))
             }
