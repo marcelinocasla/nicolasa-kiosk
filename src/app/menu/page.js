@@ -157,34 +157,28 @@ function MenuContent() {
 
     const getTotal = () => {
         let total = 0
-        let meatPrice = 0
         let salsaCount = 0
 
         Object.entries(currentDishIngredients).forEach(([id, qty]) => {
             const product = products.find(p => String(p.id) === String(id))
             if (!product) return
 
-            if (product.category === 'Carnes') {
-                meatPrice += product.price * qty
-            } else if (product.category === 'Guarniciones' || product.category === 'Ensaladas') {
-                // Free
-            } else if (product.category === 'Salsas') {
-                for (let i = 0; i < qty; i++) {
+            const price = Number(product.price) || 0;
+            const quantity = Number(qty) || 0;
+
+            if (product.category === 'Salsas') {
+                for (let i = 0; i < quantity; i++) {
                     salsaCount++
                 }
-            } else if (product.category === 'Bebidas') {
-                // "Sin bebida" is price 0, so safe.
-                total += product.price * qty
             } else {
-                total += product.price * qty
+                total += price * quantity
             }
         })
-
-        total += meatPrice
 
         if (salsaCount > 0) {
             const extraSalsas = salsaCount - 1
             if (extraSalsas > 0) {
+                // Get price of any salsa (assuming they are all 500 as before)
                 total += extraSalsas * 500
             }
         }
@@ -278,7 +272,7 @@ function MenuContent() {
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                         />
                                     ) : (
                                         CATEGORY_ICONS[product.category] || <Utensils size={48} />
@@ -288,7 +282,9 @@ function MenuContent() {
                                     <h3 className={styles.cardName}>{product.name}</h3>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         {['Guarniciones', 'Ensaladas'].includes(product.category) ? (
-                                            <span className={styles.cardPrice} style={{ fontSize: '0.9rem', color: '#10b981' }}>Incluido</span>
+                                            <span className={styles.cardPrice} style={{ fontSize: '0.9rem', color: product.price > 0 ? 'var(--color-accent)' : '#10b981' }}>
+                                                {product.price > 0 ? `$${product.price}` : 'Incluido'}
+                                            </span>
                                         ) : (
                                             product.category === 'Salsas' ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>

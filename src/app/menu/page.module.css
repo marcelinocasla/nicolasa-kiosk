@@ -104,12 +104,13 @@
 }
 
 .cardImagePlaceholder {
-    height: 180px;
-    background-color: #2D2D2D;
+    aspect-ratio: 3 / 4;
+    background-color: var(--color-white);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--color-text-muted);
+    overflow: hidden;
 }
 
 .cardContent {
@@ -253,8 +254,8 @@
     }
 
     .cardImagePlaceholder {
-        height: 100px;
-        /* Smaller image on mobile to save space */
+        /* Remove fixed height, inherit aspect-ratio from base class */
+        height: auto;
     }
 
     .cardContent {
