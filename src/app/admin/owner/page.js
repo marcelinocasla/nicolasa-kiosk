@@ -114,12 +114,13 @@ export default function OwnerPanel() {
     }
 
     const handleSaveAll = () => {
-        saveProducts(products)
+        const validProducts = products.filter(p => p.name && p.name.trim() !== '' && p.category && p.category.trim() !== '');
+        saveProducts(validProducts)
         alert('Cambios guardados')
     }
 
     const moveCategory = (category, direction) => {
-        const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
+        const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(c => c && c.trim() !== '')
         let currentOrder = [...categoryOrder]
         uniqueCategories.forEach(c => { if (!currentOrder.includes(c)) currentOrder.push(c) })
         currentOrder = currentOrder.filter(c => uniqueCategories.includes(c))
@@ -137,7 +138,7 @@ export default function OwnerPanel() {
     }
 
     const getSortedCategories = () => {
-        const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
+        const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(c => c && c.trim() !== '')
         const sorted = [...categoryOrder]
         uniqueCategories.forEach(c => { if (!sorted.includes(c)) sorted.push(c) })
         return sorted.filter(c => uniqueCategories.includes(c))

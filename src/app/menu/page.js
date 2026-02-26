@@ -37,10 +37,12 @@ function MenuContent() {
             // Let's append it to products list so it shows up in Bebidas category.
             // Actually, best to prepend so it's first? Or user wants it "default selected".
 
-            const allProducts = [...productsData, noDrinkProduct]
+            const validProductsData = productsData.filter(p => p.name && p.name.trim() !== '' && p.category && p.category.trim() !== '');
+
+            const allProducts = [...validProductsData, noDrinkProduct]
             setProducts(allProducts)
 
-            const uniqueCategories = [...new Set(productsData.map(p => p.category))]
+            const uniqueCategories = [...new Set(validProductsData.map(p => p.category))]
             // Make sure Bebidas is in there if only 'Sin bebida' exists (edge case)
             if (!uniqueCategories.includes('Bebidas')) uniqueCategories.push('Bebidas')
 
@@ -226,7 +228,8 @@ function MenuContent() {
         }
     }
 
-    const activeProducts = products.filter(p => p.category === activeCategory)
+    // Filter products by category AND availability (or if it's the 'no-drink' mock product)
+    const activeProducts = products.filter(p => p.category === activeCategory && (p.available === true || p.id === 'no-drink'))
 
     return (
         <div className={styles.container}>
