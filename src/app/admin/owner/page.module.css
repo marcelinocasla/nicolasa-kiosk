@@ -870,6 +870,171 @@
     }
 }
 
+/* --- NEW METRICS WIDGETS --- */
+.metricsRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.metricWidget {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.widgetTitle {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.widgetContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.noData {
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: auto;
+    font-style: italic;
+}
+
+/* Top Products */
+.topProductRow {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    transition: transform 0.2s;
+}
+
+.topProductRow:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.topProductRank {
+    font-weight: 800;
+    color: var(--color-primary);
+    width: 30px;
+}
+
+.topProductName {
+    flex: 1;
+    color: white;
+    font-weight: 500;
+}
+
+.topProductCount {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Category Revenue */
+.categoryRevenueRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.categoryName {
+    width: 100px;
+    color: white;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.revenueBarContainer {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.revenueBar {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+.categoryAmount {
+    width: 70px;
+    text-align: right;
+    color: #10b981;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Widget Animations */
+.pulseAnim {
+    animation: pulseIcon 2.5s infinite;
+}
+
+.bounceAnim {
+    animation: bounceIcon 3s infinite;
+}
+
+.spinAnim {
+    animation: spinIcon 10s linear infinite;
+}
+
+@keyframes pulseIcon {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIcon {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-8px);
+    }
+
+    60% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes spinIcon {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .container {

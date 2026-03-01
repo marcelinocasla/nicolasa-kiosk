@@ -164,6 +164,36 @@ export default function OwnerPanel() {
         .filter(o => o.status === 'completed' && isSameDay(new Date(o.created_at), today))
         .reduce((sum, o) => sum + (o.total || 0), 0)
 
+    // -- NEW METRICS: TOP PRODUCTS & CATEGORY REVENUE --
+    const completedOrders = orders.filter(o => o.status === 'completed');
+    const productSalesCount = {};
+    const categoryRevenueMap = {};
+
+    completedOrders.forEach(order => {
+        (order.items || []).forEach(item => {
+            if (!item.name) return; // ignore blanks
+            const qty = item.quantity || 1;
+            const price = item.price || 0;
+            const revenue = qty * price;
+
+            productSalesCount[item.name] = (productSalesCount[item.name] || 0) + qty;
+
+            // Resolve category from products state
+            const productDef = products.find(p => p.name === item.name);
+            const category = productDef ? productDef.category : 'Otros';
+
+            categoryRevenueMap[category] = (categoryRevenueMap[category] || 0) + revenue;
+        });
+    });
+
+    const topProducts = Object.entries(productSalesCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([name, count]) => ({ name, count }));
+
+    const categoryRevenue = Object.entries(categoryRevenueMap)
+        .sort((a, b) => b[1] - a[1]);
+
     if (loading) return <div className={styles.loadingState}>Cargando Panel...</div>
 
     return (
@@ -255,7 +285,7 @@ export default function OwnerPanel() {
                         <div className={styles.dashboardView}>
                             <div className={styles.statsGrid}>
                                 <div className={`${styles.statCard} ${styles.statWarning}`}>
-                                    <div className={styles.statIcon}><ShoppingBag size={24} /></div>
+                                    <div className={`${styles.statIcon} ${styles.pulseAnim}`}><ShoppingBag size={24} /></div>
                                     <div className={styles.statInfo}>
                                         <span className={styles.statLabel}>Pedidos Activos</span>
                                         <span className={styles.statValue}>{pendingOrders.length}</span>
@@ -263,19 +293,54 @@ export default function OwnerPanel() {
                                     <button className={styles.statLink} onClick={() => setView('orders')}>Ver Todos</button>
                                 </div>
                                 <div className={`${styles.statCard} ${styles.statSuccess}`}>
-                                    <div className={styles.statIcon}><DollarSign size={24} /></div>
+                                    <div className={`${styles.statIcon} ${styles.bounceAnim}`}><DollarSign size={24} /></div>
                                     <div className={styles.statInfo}>
                                         <span className={styles.statLabel}>Ventas Hoy</span>
                                         <span className={styles.statValue}>${salesToday.toLocaleString()}</span>
                                     </div>
                                 </div>
                                 <div className={`${styles.statCard} ${styles.statNeutral}`}>
-                                    <div className={styles.statIcon}><Menu size={24} /></div>
+                                    <div className={`${styles.statIcon} ${styles.spinAnim}`}><Menu size={24} /></div>
                                     <div className={styles.statInfo}>
                                         <span className={styles.statLabel}>Productos</span>
                                         <span className={styles.statValue}>{products.length}</span>
                                     </div>
                                     <button className={styles.statLink} onClick={() => setView('products')}>Gestionar</button>
+                                </div>
+                            </div>
+
+                            <div className={styles.metricsRow}>
+                                {/* Top Products Card */}
+                                <div className={styles.metricWidget}>
+                                    <h3 className={styles.widgetTitle}>🏆 Top 3 Productos</h3>
+                                    <div className={styles.widgetContent}>
+                                        {topProducts.length > 0 ? topProducts.map((p, idx) => (
+                                            <div key={idx} className={styles.topProductRow}>
+                                                <span className={styles.topProductRank}>#{idx + 1}</span>
+                                                <span className={styles.topProductName}>{p.name}</span>
+                                                <span className={styles.topProductCount}>{p.count} unid.</span>
+                                            </div>
+                                        )) : <p className={styles.noData}>No hay datos suficientes</p>}
+                                    </div>
+                                </div>
+
+                                {/* Category Revenue Card */}
+                                <div className={styles.metricWidget}>
+                                    <h3 className={styles.widgetTitle}>📈 Ingresos por Categoría</h3>
+                                    <div className={styles.widgetContent}>
+                                        {categoryRevenue.length > 0 ? categoryRevenue.map(([cat, rev], idx) => (
+                                            <div key={idx} className={styles.categoryRevenueRow}>
+                                                <span className={styles.categoryName}>{cat}</span>
+                                                <div className={styles.revenueBarContainer}>
+                                                    <div
+                                                        className={styles.revenueBar}
+                                                        style={{ width: `${Math.max(10, (rev / categoryRevenue[0][1]) * 100)}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className={styles.categoryAmount}>${rev.toLocaleString()}</span>
+                                            </div>
+                                        )) : <p className={styles.noData}>No hay datos suficientes</p>}
+                                    </div>
                                 </div>
                             </div>
 

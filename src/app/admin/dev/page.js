@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, ArrowLeft, RefreshCw, Home } from 'lucide-react'
+import { Save, ArrowLeft, RefreshCw, Home, Activity, CheckCircle, Clock, XCircle, Edit3 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -11,7 +11,14 @@ export default function DevPanel() {
     const [loading, setLoading] = useState(true)
 
     const [orders, setOrders] = useState([])
-    const [metrics, setMetrics] = useState({ orders: 0, revenue: 0 })
+    const [metrics, setMetrics] = useState({
+        orders: 0,
+        revenue: 0,
+        completed: 0,
+        pending: 0,
+        cancelled: 0,
+        edited: 0
+    })
 
     const fetchData = () => {
         setLoading(true)
@@ -24,12 +31,20 @@ export default function DevPanel() {
                 setOrders(ordersData) // Store all orders
 
                 const completedOrders = ordersData.filter(o => o.status === 'completed')
+                const pendingOrders = ordersData.filter(o => o.status === 'pending')
+                const cancelledOrders = ordersData.filter(o => o.status === 'cancelled')
+                const editedOrders = ordersData.filter(o => o.was_edited)
+
                 const totalOrdersCount = ordersData.length
                 const totalRevenueCalc = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0)
 
                 setMetrics({
                     orders: totalOrdersCount,
-                    revenue: totalRevenueCalc
+                    revenue: totalRevenueCalc,
+                    completed: completedOrders.length,
+                    pending: pendingOrders.length,
+                    cancelled: cancelledOrders.length,
+                    edited: editedOrders.length
                 })
             }
             setLoading(false)
@@ -132,16 +147,61 @@ export default function DevPanel() {
                     </section>
 
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Métricas en Tiempo Real</h2>
-                        <div className={styles.metricsGrid}>
-                            <div className={`${styles.metricCard} ${styles.metricCardBlue}`}>
-                                <div className={styles.metricLabel}>Total Pedidos (Histórico)</div>
-                                <div className={styles.metricValue}>{metrics.orders}</div>
+                        <h2 className={styles.sectionTitle}>Métricas del Sistema</h2>
+                        <div className={styles.systemMetricsGrid}>
+
+                            {/* Distribution Card */}
+                            <div className={styles.systemCard}>
+                                <div className={styles.systemCardHeader}>
+                                    <Activity className={styles.iconPulse} size={20} />
+                                    <h3>Distribución de Pedidos</h3>
+                                </div>
+                                <div className={styles.distributionStats}>
+                                    <div className={styles.distStat}>
+                                        <CheckCircle size={18} color="#10b981" />
+                                        <span>Completados: {metrics.completed}</span>
+                                    </div>
+                                    <div className={styles.distStat}>
+                                        <Clock size={18} color="#f59e0b" />
+                                        <span>Pendientes: {metrics.pending}</span>
+                                    </div>
+                                    <div className={styles.distStat}>
+                                        <XCircle size={18} color="#ef4444" />
+                                        <span>Cancelados: {metrics.cancelled}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.totalStat}>
+                                    <span className={styles.totalLabel}>Total Histórico:</span>
+                                    <span className={styles.totalValue}>{metrics.orders}</span>
+                                </div>
                             </div>
-                            <div className={`${styles.metricCard} ${styles.metricCardOrange}`}>
-                                <div className={styles.metricLabel}>Ingresos Totales (Completados)</div>
-                                <div className={styles.metricValue}>${(metrics.revenue).toLocaleString()}</div>
+
+                            {/* Edit Rate Card */}
+                            <div className={styles.systemCard}>
+                                <div className={styles.systemCardHeader}>
+                                    <Edit3 className={styles.iconBounce} size={20} />
+                                    <h3>Tasa de Edición</h3>
+                                </div>
+                                <div className={styles.editRateContent}>
+                                    <div className={styles.editRateCircle}>
+                                        {metrics.orders > 0 ? Math.round((metrics.edited / metrics.orders) * 100) : 0}%
+                                    </div>
+                                    <p className={styles.editRateDesc}>
+                                        {metrics.edited} de {metrics.orders} pedidos fueron editados después de su creación.
+                                    </p>
+                                </div>
                             </div>
+
+                            {/* Revenue Card (re-styled) */}
+                            <div className={`${styles.systemCard} ${styles.highlightCard}`}>
+                                <div className={styles.systemCardHeader}>
+                                    <h3 style={{ margin: 0 }}>Ingresos Totales</h3>
+                                </div>
+                                <div className={styles.revenueBig}>
+                                    ${(metrics.revenue).toLocaleString()}
+                                </div>
+                            </div>
+
                         </div>
                     </section>
 
